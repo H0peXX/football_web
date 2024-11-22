@@ -17,7 +17,7 @@ function App() {
     <NavBar />
       <Routes>
         <Route path="/" element={<ForumPage threads={threads} setThreads={setThreads}/>} />
-        <Route path="/" element={<HomePage />} />
+        <Route path="/home" element={<HomePage />} />
         <Route path="/login" element={<LoginSignup action="Login"/>} />
         <Route path="/signup" element={<LoginSignup action="Sign Up"/>} />
         <Route

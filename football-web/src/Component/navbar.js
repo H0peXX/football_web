@@ -1,4 +1,3 @@
-// Component/Navigation/NavBar.js
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import './navbar.css'; // Optional: For adding some custom styling
@@ -8,17 +7,27 @@ function NavBar() {
     <nav className="navbar">
       <ul>
         <li>
-          <NavLink to="/" end className="nav-link" activeClassName="active">
+          <NavLink 
+            to="/" 
+            end 
+            className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+          >
             Home
           </NavLink>
         </li>
         <li>
-          <NavLink to="/login" className="nav-link" activeClassName="active">
+          <NavLink 
+            to="/login" 
+            className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+          >
             Login
           </NavLink>
         </li>
         <li>
-          <NavLink to="/signup" className="nav-link" activeClassName="active">
+          <NavLink 
+            to="/signup" 
+            className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+          >
             Signup
           </NavLink>
         </li>

@@ -3,10 +3,14 @@ import user_icon from './Asset/person.png';
 import email_icon from './Asset/email.png';
 import password_icon from './Asset/password.png';
 import './LoginSignup.css';
+import { useNavigate } from "react-router-dom";
+
+
 
 const LoginSignup = ({ action }) => {
     const [currentAction, setCurrentAction] = useState(action || "Login");
     const [animationClass, setAnimationClass] = useState("fade-in");
+    const navigate = useNavigate();
 
     // Define formData state
     const [formData, setFormData] = useState({
@@ -29,7 +33,6 @@ const LoginSignup = ({ action }) => {
             [name]: value,
         }));
     };
-
     // Handle form submission (Login or Signup)
     const handleSubmit = async (e) => {
         e.preventDefault(); // Prevent default form submission
@@ -43,6 +46,7 @@ const LoginSignup = ({ action }) => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(formData),
+                credentials: 'include',
             });
 
             const data = await response.json();
@@ -56,6 +60,7 @@ const LoginSignup = ({ action }) => {
                     email: "",
                     password: "",
                 });
+                navigate("/home");
             } else {
                 alert(data.message);
             }
