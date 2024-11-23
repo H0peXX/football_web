@@ -14,8 +14,12 @@ function NavBar() {
           method: "GET",
           credentials: "include", // Include session cookies
         });
-        const data = await response.json();
-        setIsLoggedIn(data.valid); // Set login status based on server response
+        if (response.ok) {
+          const data = await response.json();
+          setIsLoggedIn(data.valid || false); // Safely check login status
+        } else {
+          console.error("Failed to verify login status.");
+        }
       } catch (error) {
         console.error("Error checking login status:", error);
       }
@@ -48,14 +52,14 @@ function NavBar() {
       <ul>
         <li>
           <NavLink
-            to="/"
+            to="/home"
             end
             className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
           >
             Home
           </NavLink>
         </li>
-        {!isLoggedIn && (
+        {!isLoggedIn ? (
           <>
             <li>
               <NavLink
@@ -74,12 +78,16 @@ function NavBar() {
               </NavLink>
             </li>
           </>
-        )}
-        {isLoggedIn && (
+        ) : (
           <li>
-            <button onClick={handleLogout} className="nav-link logout-button">
+            <span
+              onClick={handleLogout}
+              className="nav-link logout-link"
+              role="button"
+              tabIndex="0"
+            >
               Logout
-            </button>
+            </span>
           </li>
         )}
       </ul>
