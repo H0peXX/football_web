@@ -77,6 +77,14 @@ function NavBar() {
                 Signup
               </NavLink>
             </li>
+            <li>
+              <NavLink
+                to="/players"
+                className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+              >
+                Playerlisting
+              </NavLink>
+            </li>
           </>
         ) : (
           <li>

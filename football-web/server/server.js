@@ -49,7 +49,7 @@ db.connect((err) => {
 // Enable CORS
 app.use(cors({
   origin: ["http://localhost:3000"], // React frontend URL
-  methods: ["GET", "POST"],
+  methods: ["GET", "POST", "PUT"],
   credentials: true,
 }));
 
@@ -147,6 +147,78 @@ app.post("/logout", (req, res) => {
     }
     res.clearCookie("connect.sid"); // Clear session cookie
     return res.status(200).json({ message: "Logout successful!" });
+  });
+});
+
+//get data for players
+app.get('/players', (req, res) => {
+  const query = "SELECT * FROM user WHERE role = 'User'";
+
+  db.query(query, (err, results) => {
+      if (err) {
+          console.error("Error fetching players:", err);
+          return res.status(500).json({ message: "Error fetching players" });
+      }
+      console.log("Database results:", results);
+      return res.status(200).json(results);
+  });
+});
+
+//get data for each player
+app.get('/players/:email', (req, res) => {
+  const { email } = req.params;
+  const query = "SELECT * FROM user WHERE email = ?";
+
+  db.query(query, [email], (err, results) => {
+      if (err) {
+          console.error("Error fetching player by email:", err);
+          return res.status(500).json({ message: "Error fetching player details" });
+      }
+
+      if (results.length === 0) {
+          return res.status(404).json({ message: "Player not found" });
+      }
+
+      return res.status(200).json(results[0]);
+  });
+});
+
+// Update Player by email
+app.put('/players/:email', (req, res) => {
+  const { email } = req.params;
+  const { firstName, lastName, role, imageUrl } = req.body;
+
+  const query = `UPDATE user SET firstname = ?, lastname = ?, role = ?, image = ? WHERE email = ?`;
+  db.query(query, [firstName, lastName, role, imageUrl, email], (err, results) => {
+      if (err) {
+          console.error("Database error:", err);
+          return res.status(500).json({ message: "Internal server error" });
+      }
+
+      if (results.affectedRows === 0) {
+          return res.status(404).json({ message: "Player not found" });
+      }
+
+      res.json({ message: "Player updated successfully!" });
+  });
+});
+
+// Delete Player by email
+app.delete('/players/:email', (req, res) => {
+  const { email } = req.params;
+
+  const query = `DELETE FROM user WHERE email = ?`;
+  db.query(query, [email], (err, results) => {
+      if (err) {
+          console.error("Database error:", err);
+          return res.status(500).json({ message: "Internal server error" });
+      }
+
+      if (results.affectedRows === 0) {
+          return res.status(404).json({ message: "Player not found" });
+      }
+
+      res.json({ message: "Player deleted successfully!" });
   });
 });
 

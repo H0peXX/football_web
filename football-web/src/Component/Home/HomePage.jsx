@@ -55,6 +55,7 @@ const LinkedInHomePage = () => {
               <strong>15</strong> Views of your post
             </p>
           </div>
+          <button>View detail profile</button>
         </aside>
 
         {/* Feed */}

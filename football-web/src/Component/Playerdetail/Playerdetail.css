@@ -1,0 +1,65 @@
+/* PlayerDetail.css */
+.player-detail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    background-color: #f4f4f9;
+    padding: 20px;
+}
+
+.player-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid #007BFF;
+    margin-bottom: 20px;
+}
+
+.player-detail h1 {
+    font-size: 28px;
+    color: #333;
+    margin: 10px 0;
+}
+
+.player-detail p {
+    font-size: 16px;
+    color: #666;
+    margin: 5px 0;
+}
+
+.player-detail .player-role {
+    font-size: 14px;
+    background: #007BFF;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin-top: 15px;
+}
+.player-edit-form input {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.player-edit-form button {
+    margin-right: 10px;
+    padding: 10px 20px;
+    background: #007BFF;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.player-edit-form button:last-child {
+    background: #ccc;
+}
+
+.player-edit-form button:hover {
+    opacity: 0.9;
+}
