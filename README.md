@@ -1,3 +1,3 @@
 # football_web
 
-npm install react-router-dom
+npm install express-session body-parser cookie-parser
