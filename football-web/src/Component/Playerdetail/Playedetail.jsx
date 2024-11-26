@@ -7,6 +7,9 @@ const PlayerDetail = () => {
     const navigate = useNavigate();
     const [player, setPlayer] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [comments, setComments] = useState([]);
+    const [name, setName] = useState("");
+    const [newComment, setNewComment] = useState('');
     const [editing, setEditing] = useState(false);
     const [formData, setFormData] = useState({
         firstName: "",
@@ -14,6 +17,22 @@ const PlayerDetail = () => {
         role: "",
         imageUrl: "",
     });
+
+    useEffect(() => {
+        fetch("http://localhost:5000", {
+          method: "GET",
+          credentials: "include", // Send cookies with request
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.valid) {
+              setName(data.email); // Set user's email as name
+            } else {
+              alert("Not logged in"); // Redirect if not authenticated
+            }
+          })
+          .catch((err) => console.error("Error fetching user data:", err));
+      }, [navigate]);
 
     useEffect(() => {
         fetch(`http://localhost:5000/players/${encodeURIComponent(email)}`)
@@ -33,6 +52,54 @@ const PlayerDetail = () => {
                 setLoading(false);
             });
     }, [email]);
+
+    useEffect(() => {
+        const fetchComments = async () => {
+            try {
+                const response = await fetch(`http://localhost:5000/comments/${encodeURIComponent(email)}`);
+                const data = await response.json();
+                setComments(data);
+            } catch (error) {
+                console.error('Failed to fetch comments:', error);
+            }
+        };
+
+        fetchComments();
+    }, [email]);
+
+    // Handle comment submission
+    const handleCommentSubmit = async (e) => {
+        e.preventDefault();
+        if (!newComment.trim()) {
+            alert('Comment cannot be empty.');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const response = await fetch('http://localhost:5000/comments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: name, // Replace with actual logged-in user email
+                    playerEmail: email,
+                    comment: newComment,
+                }),
+            });
+
+            if (response.ok) {
+                const addedComment = await response.json();
+                setComments((prev) => [addedComment, ...prev]); // Prepend new comment
+                setNewComment(''); // Reset input
+            } else {
+                alert('Failed to post comment');
+            }
+        } catch (error) {
+            console.error('Failed to post comment:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -85,7 +152,7 @@ const PlayerDetail = () => {
     return (
         <div className="player-detail">
             <img
-                src={player.image || "https://via.placeholder.com/150"}
+                src={player.image || 'https://via.placeholder.com/150'}
                 alt={`${player.firstname} ${player.lastname}`}
                 className="player-avatar"
             />
@@ -131,6 +198,40 @@ const PlayerDetail = () => {
                     <button onClick={handleDelete}>Delete</button>
                 </>
             )}
+
+            {/* Comments Section */}
+            <div className="comments-section">
+                <h2>Comments</h2>
+
+                {/* Comments List */}
+                <div className="comments-list">
+                    {comments.length > 0 ? (
+                        comments.map((comment) => (
+                            <div key={comment.id} className="comment">
+                                <p>
+                                    <strong>{comment.email}</strong>:
+                                </p>
+                                <p>{comment.comment}</p>
+                                <small>{new Date(comment.created_at).toLocaleString()}</small>
+                            </div>
+                        ))
+                    ) : (
+                        <p>No comments yet. Be the first to comment!</p>
+                    )}
+                </div>
+
+                {/* Add Comment Form */}
+                <form onSubmit={handleCommentSubmit} className="comment-form">
+                    <textarea
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        placeholder="Add your comment..."
+                    />
+                    <button type="submit" disabled={loading}>
+                        {loading ? 'Posting...' : 'Post Comment'}
+                    </button>
+                </form>
+            </div>
         </div>
     );
 };

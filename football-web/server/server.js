@@ -49,7 +49,7 @@ db.connect((err) => {
 // Enable CORS
 app.use(cors({
   origin: ["http://localhost:3000"], // React frontend URL
-  methods: ["GET", "POST", "PUT"],
+  methods: ["GET", "POST", "PUT","DELETE"],
   credentials: true,
 }));
 
@@ -222,6 +222,42 @@ app.delete('/players/:email', (req, res) => {
   });
 });
 
+//get comment
+app.get('/comments/:playerEmail', (req, res) => {
+  const { playerEmail } = req.params;
+  db.query(
+      'SELECT * FROM comments WHERE player_email = ? ORDER BY created_at DESC',
+      [playerEmail],
+      (err, results) => {
+          if (err) {
+              console.error(err);
+              return res.status(500).json({ message: 'Failed to fetch comments' });
+          }
+          res.json(results);
+      }
+  );
+});
+
+//post comment
+app.post('/comments', (req, res) => {
+  const { email, playerEmail, comment } = req.body;
+
+  if (!email || !playerEmail || !comment) {
+      return res.status(400).json({ message: 'All fields are required' });
+  }
+
+  db.query(
+      'INSERT INTO comments (email, player_email, comment) VALUES (?, ?, ?)',
+      [email, playerEmail, comment],
+      (err) => {
+          if (err) {
+              console.error(err);
+              return res.status(500).json({ message: 'Failed to post comment' });
+          }
+          res.status(201).json({ message: 'Comment added successfully' });
+      }
+  );
+});
 
 // Start the server
 const PORT = 5000;
