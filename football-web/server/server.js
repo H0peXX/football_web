@@ -259,6 +259,25 @@ app.post('/comments', (req, res) => {
   );
 });
 
+//edit comment
+app.put('/comments/:id', (req, res) => {
+  const { id } = req.params;
+  const { comment } = req.body;
+
+  // Logic to update comment in database
+  db.query(
+      'UPDATE comments SET comment = ? WHERE id = ?',
+      [comment, id],
+      (err, results) => {
+          if (err) {
+              res.status(500).json({ error: 'Database error' });
+          } else {
+              res.json({ id, comment });
+          }
+      }
+  );
+});
+
 // Start the server
 const PORT = 5000;
 app.listen(PORT, () => {

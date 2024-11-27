@@ -6,6 +6,8 @@ const PlayerDetail = () => {
     const { email } = useParams();
     const navigate = useNavigate();
     const [player, setPlayer] = useState(null);
+    const [editingCommentId, setEditingCommentId] = useState(null);
+    const [editedComment, setEditedComment] = useState('');
     const [loading, setLoading] = useState(true);
     const [comments, setComments] = useState([]);
     const [name, setName] = useState("");
@@ -98,6 +100,42 @@ const PlayerDetail = () => {
             console.error('Failed to post comment:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    //comment edit
+    const handleEditComment = (commentId, currentComment) => {
+        setEditingCommentId(commentId);
+        setEditedComment(currentComment);
+    };
+    
+    const handleSaveEditedComment = async (commentId) => {
+        if (!editedComment.trim()) {
+            alert('Edited comment cannot be empty.');
+            return;
+        }
+    
+        try {
+            const response = await fetch(`http://localhost:5000/comments/${commentId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ comment: editedComment }),
+            });
+    
+            if (response.ok) {
+                const updatedComment = await response.json();
+                setComments((prev) =>
+                    prev.map((comment) =>
+                        comment.id === commentId ? { ...comment, comment: updatedComment.comment } : comment
+                    )
+                );
+                setEditingCommentId(null); // Exit edit mode
+                setEditedComment(''); // Reset edited comment input
+            } else {
+                alert('Failed to save comment');
+            }
+        } catch (error) {
+            console.error('Failed to save comment:', error);
         }
     };
 
@@ -205,19 +243,33 @@ const PlayerDetail = () => {
 
                 {/* Comments List */}
                 <div className="comments-list">
-                    {comments.length > 0 ? (
-                        comments.map((comment) => (
-                            <div key={comment.id} className="comment">
-                                <p>
-                                    <strong>{comment.email}</strong>:
-                                </p>
-                                <p>{comment.comment}</p>
-                                <small>{new Date(comment.created_at).toLocaleString()}</small>
-                            </div>
-                        ))
-                    ) : (
-                        <p>No comments yet. Be the first to comment!</p>
-                    )}
+                {comments.length > 0 ? (
+    comments.map((comment) => (
+        <div key={comment.id} className="comment">
+            {editingCommentId === comment.id ? (
+                <div>
+                    <textarea
+                        value={editedComment}
+                        onChange={(e) => setEditedComment(e.target.value)}
+                    />
+                    <button onClick={() => handleSaveEditedComment(comment.id)}>Save</button>
+                    <button onClick={() => setEditingCommentId(null)}>Cancel</button>
+                </div>
+            ) : (
+                <>
+                    <p>
+                        <strong>{comment.email}</strong>:
+                    </p>
+                    <p>{comment.comment}</p>
+                    <small>{new Date(comment.created_at).toLocaleString()}</small>
+                    <button onClick={() => handleEditComment(comment.id, comment.comment)}>Edit</button>
+                </>
+            )}
+        </div>
+    ))
+) : (
+    <p>No comments yet. Be the first to comment!</p>
+)}
                 </div>
 
                 {/* Add Comment Form */}
