@@ -278,6 +278,20 @@ app.put('/comments/:id', (req, res) => {
   );
 });
 
+//delete comment
+app.delete('/comments/:id', (req, res) => {
+  const { id } = req.params;
+
+  // Logic to delete the comment from the database
+  db.query('DELETE FROM comments WHERE id = ?', [id], (err, results) => {
+      if (err) {
+          res.status(500).json({ error: 'Database error' });
+      } else {
+          res.json({ success: true });
+      }
+  });
+});
+
 // Start the server
 const PORT = 5000;
 app.listen(PORT, () => {

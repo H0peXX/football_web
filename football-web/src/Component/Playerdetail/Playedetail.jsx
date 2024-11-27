@@ -139,6 +139,26 @@ const PlayerDetail = () => {
         }
     };
 
+    //comment delete
+    const handleDeleteComment = async (commentId) => {
+        if (!window.confirm("Are you sure you want to delete this comment?")) return;
+    
+        try {
+            const response = await fetch(`http://localhost:5000/comments/${commentId}`, {
+                method: 'DELETE',
+            });
+    
+            if (response.ok) {
+                setComments((prev) => prev.filter((comment) => comment.id !== commentId));
+                alert('Comment deleted successfully!');
+            } else {
+                alert('Failed to delete comment');
+            }
+        } catch (error) {
+            console.error('Failed to delete comment:', error);
+        }
+    };
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prevState) => ({ ...prevState, [name]: value }));
@@ -263,6 +283,7 @@ const PlayerDetail = () => {
                     <p>{comment.comment}</p>
                     <small>{new Date(comment.created_at).toLocaleString()}</small>
                     <button onClick={() => handleEditComment(comment.id, comment.comment)}>Edit</button>
+                    <button onClick={() => handleDeleteComment(comment.id)}>Delete</button>
                 </>
             )}
         </div>
