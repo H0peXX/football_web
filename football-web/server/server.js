@@ -314,7 +314,7 @@ app.post('/offers', (req, res) => {
   );
 });
 
-//view offer
+//view sent offer
 app.get('/offers/sent/:email', (req, res) => {
   const senderEmail = req.params.email;
 
@@ -327,6 +327,25 @@ app.get('/offers/sent/:email', (req, res) => {
               return res.status(500).json({ error: 'Failed to fetch sent offers' });
           }
           res.status(200).json(results);
+      }
+  );
+});
+
+//edit sent offer
+app.put('/offers/:id', (req, res) => {
+  const offerId = req.params.id;
+  const { message } = req.body;
+
+  db.query(
+      'UPDATE offers SET message = ? WHERE id = ?',
+      [message, offerId],
+      (err, result) => {
+          if (err) {
+              console.error('Failed to update offer:', err);
+              return res.status(500).json({ error: 'Failed to update offer' });
+          }
+
+          res.status(200).json({ message: 'Offer updated successfully'});
       }
   );
 });

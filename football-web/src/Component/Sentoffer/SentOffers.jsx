@@ -7,12 +7,13 @@ const SentOffers = () => {
     const [offers, setOffers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [userEmail, setUserEmail] = useState("");
+    const [editingOfferId, setEditingOfferId] = useState(null);
+    const [editedMessage, setEditedMessage] = useState("");
 
     useEffect(() => {
-        // Fetch logged-in user's email
         fetch("http://localhost:5000", {
             method: "GET",
-            credentials: "include", // Send cookies with request
+            credentials: "include",
         })
             .then((res) => res.json())
             .then((data) => {
@@ -40,6 +41,40 @@ const SentOffers = () => {
             });
     };
 
+    const handleEditClick = (offerId, currentMessage) => {
+        setEditingOfferId(offerId);
+        setEditedMessage(currentMessage);
+    };
+
+    const handleSaveClick = async (offerId) => {
+        if (!editedMessage.trim()) {
+            alert("Message cannot be empty.");
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:5000/offers/${offerId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: editedMessage }),
+            });
+
+            if (response.ok) {
+                setOffers((prev) =>
+                    prev.map((offer) =>
+                        offer.id === offerId ? { ...offer, message: editedMessage } : offer
+                    )
+                );
+                alert("Offer updated successfully!");
+                setEditingOfferId(null); // Exit edit mode
+            } else {
+                alert("Failed to update offer");
+            }
+        } catch (error) {
+            console.error("Failed to update offer:", error);
+        }
+    };
+
     if (loading) return <p>Loading...</p>;
 
     return (
@@ -49,9 +84,29 @@ const SentOffers = () => {
                 <ul className="offer-list">
                     {offers.map((offer) => (
                         <li key={offer.id} className="offer-item">
-                            <p><strong>To:</strong> {offer.receiverEmail}</p>
-                            <p><strong>Message:</strong> {offer.message}</p>
-                            <small>Sent on: {new Date(offer.created_at).toLocaleString()}</small>
+                            <p>
+                                <strong>To:</strong> {offer.receiverEmail}
+                            </p>
+                            {editingOfferId === offer.id ? (
+                                <>
+                                    <textarea
+                                        value={editedMessage}
+                                        onChange={(e) => setEditedMessage(e.target.value)}
+                                    />
+                                    <button onClick={() => handleSaveClick(offer.id)}>Save</button>
+                                    <button onClick={() => setEditingOfferId(null)}>Cancel</button>
+                                </>
+                            ) : (
+                                <>
+                                    <p>
+                                        <strong>Message:</strong> {offer.message}
+                                    </p>
+                                    <small>Sent on: {new Date(offer.created_at).toLocaleString()}</small>
+                                    <button onClick={() => handleEditClick(offer.id, offer.message)}>
+                                        Edit
+                                    </button>
+                                </>
+                            )}
                         </li>
                     ))}
                 </ul>
