@@ -1,39 +1,52 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ronaldo from "./Asset_home/ronaldo.png"
-
 
 const LinkedInHomePage = () => {
   const [name, setName] = useState("");
+  const [latestTransfers, setLatestTransfers] = useState([]);
   const navigate = useNavigate();
 
-  // Fetch user data on component mount
   useEffect(() => {
+    // Fetch user data
     fetch("http://localhost:5000", {
       method: "GET",
-      credentials: "include", // Send cookies with request
+      credentials: "include",
     })
       .then((res) => res.json())
       .then((data) => {
         if (data.valid) {
-          setName(data.email); // Set user's email as name
+          setName(data.email);
         } else {
-          navigate("/login"); // Redirect if not authenticated
+          navigate("/login");
         }
       })
       .catch((err) => console.error("Error fetching user data:", err));
   }, [navigate]);
 
+  useEffect(() => {
+    // Fetch latest transfers
+    const fetchLatestTransfers = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/offers/latest");
+        if (response.ok) {
+          const data = await response.json();
+          setLatestTransfers(data);
+        }
+      } catch (error) {
+        console.error("Error fetching latest transfers:", error);
+      }
+    };
+
+    fetchLatestTransfers();
+  }, []);
+
   return (
     <div style={{ fontFamily: "Arial, sans-serif", backgroundColor: "#f3f6fa", padding: "20px" }}>
-      {/* Header */}
       <header style={{ backgroundColor: "#ffffff", padding: "15px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}>
         <h1 style={{ margin: 0, fontSize: "24px", color: "#0073b1" }}>Football Web</h1>
       </header>
 
-      {/* Main Content */}
       <div style={{ display: "flex", marginTop: "20px" }}>
-        {/* Sidebar */}
         <aside
           style={{
             width: "25%",
@@ -58,7 +71,6 @@ const LinkedInHomePage = () => {
           <button>View detail profile</button>
         </aside>
 
-        {/* Feed */}
         <main style={{ width: "75%" }}>
           <div
             style={{
@@ -87,7 +99,7 @@ const LinkedInHomePage = () => {
             </button>
           </div>
 
-          {/* Post Section */}
+          {/* Latest Transfers Section */}
           <div
             style={{
               backgroundColor: "#ffffff",
@@ -96,19 +108,18 @@ const LinkedInHomePage = () => {
               boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
             }}
           >
-            <h4 style={{ margin: "0 0 10px" }}>Lasted Transfer</h4>
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <img
-                src={ronaldo} // Placeholder image
-                style={{ width: "150px", height: "100px", marginRight: "15px", borderRadius: "5px" }}
-              />
-              <div>
-                <p>
-                  <strong>CR7</strong> is launching his own venture-capital firm.
-                </p>
-                <p style={{ fontSize: "14px", color: "#555" }}>1,134 Likes - 46 Comments</p>
+            <h4 style={{ margin: "0 0 10px" }}>Latest Transfers</h4>
+            {latestTransfers.map((transfer) => (
+              <div key={transfer.id} style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}>
+                <div>
+                  <p>
+                    <strong>{transfer.firstname} {transfer.lastname}</strong> was signed by{" "}
+                    <strong>{transfer.senderEmail}</strong>.
+                  </p>
+                  <p style={{ fontSize: "14px", color: "#555" }}>{new Date(transfer.created_at).toLocaleString()}</p>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
         </main>
       </div>

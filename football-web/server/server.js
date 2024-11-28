@@ -435,6 +435,27 @@ app.get('/offers/signed/:email', (req, res) => {
   });
 });
 
+//fetch news
+app.get('/offers/latest', (req, res) => {
+  const query = `
+      SELECT o.id, o.senderEmail, o.receiverEmail, o.message, o.status, o.created_at, u.firstname, u.lastname
+      FROM offers o
+      JOIN user u ON o.receiverEmail = u.email
+      WHERE o.status = 'accepted'
+      ORDER BY o.created_at DESC
+      LIMIT 5
+  `;
+
+  db.query(query, (err, results) => {
+      if (err) {
+          console.error('Error fetching latest offers:', err);
+          return res.status(500).json({ error: 'Failed to fetch latest offers' });
+      }
+
+      res.json(results);
+  });
+});
+
 // Start the server
 const PORT = 5000;
 app.listen(PORT, () => {
