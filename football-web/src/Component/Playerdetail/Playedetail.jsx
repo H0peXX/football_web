@@ -6,6 +6,8 @@ const PlayerDetail = () => {
     const { email } = useParams();
     const navigate = useNavigate();
     const [player, setPlayer] = useState(null);
+    const [showOfferModal, setShowOfferModal] = useState(false);
+    const [offerMessage, setOfferMessage] = useState('');
     const [editingCommentId, setEditingCommentId] = useState(null);
     const [editedComment, setEditedComment] = useState('');
     const [loading, setLoading] = useState(true);
@@ -158,7 +160,45 @@ const PlayerDetail = () => {
             console.error('Failed to delete comment:', error);
         }
     };
-
+    
+    const handleSendOffer = async () => {
+        if (!offerMessage.trim()) {
+            alert('Offer message cannot be empty.');
+            return;
+        }
+    
+        try {
+            console.log('Sending offer:', {
+                senderEmail: name,
+                receiverEmail: email,
+                message: offerMessage,
+            });
+    
+            const response = await fetch('http://localhost:5000/offers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    senderEmail: name, // Current user's email
+                    receiverEmail: email, // Player being viewed
+                    message: offerMessage,
+                }),
+            });
+    
+            const result = await response.json();
+            console.log('Response:', result);
+    
+            if (response.ok) {
+                alert('Offer sent successfully!');
+                setShowOfferModal(false);
+                setOfferMessage('');
+            } else {
+                alert(result.error || 'Failed to send offer');
+            }
+        } catch (error) {
+            console.error('Error sending offer:', error);
+            alert('Failed to send offer: Network or server issue.');
+        }
+    };
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prevState) => ({ ...prevState, [name]: value }));
@@ -254,8 +294,26 @@ const PlayerDetail = () => {
                     <p>Role: {player.role}</p>
                     <button onClick={() => setEditing(true)}>Edit</button>
                     <button onClick={handleDelete}>Delete</button>
+                    <button onClick={() => setShowOfferModal(true)}>Send Offer</button>
                 </>
             )}
+            {/* Offer Modal */}
+{showOfferModal && (
+    <div className="offer-modal">
+        <div className="modal-content">
+            <h2>Send Offer to {player.firstname} {player.lastname}</h2>
+            <textarea
+                value={offerMessage}
+                onChange={(e) => setOfferMessage(e.target.value)}
+                placeholder="Write your offer message here..."
+            />
+            <div className="modal-actions">
+                <button onClick={handleSendOffer}>Send</button>
+                <button onClick={() => setShowOfferModal(false)}>Cancel</button>
+            </div>
+        </div>
+    </div>
+)}
 
             {/* Comments Section */}
             <div className="comments-section">
@@ -264,9 +322,9 @@ const PlayerDetail = () => {
                 {/* Comments List */}
                 <div className="comments-list">
                 {comments.length > 0 ? (
-    comments.map((comment) => (
-        <div key={comment.id} className="comment">
-            {editingCommentId === comment.id ? (
+                comments.map((comment) => (
+             <div key={comment.id} className="comment">
+                    {editingCommentId === comment.id ? (
                 <div>
                     <textarea
                         value={editedComment}

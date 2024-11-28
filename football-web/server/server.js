@@ -292,6 +292,45 @@ app.delete('/comments/:id', (req, res) => {
   });
 });
 
+//send offer
+app.post('/offers', (req, res) => {
+  const { senderEmail, receiverEmail, message } = req.body;
+
+  if (!senderEmail || !receiverEmail || !message) {
+      return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  // Example of inserting into a database
+  db.query(
+      'INSERT INTO offers (senderEmail, receiverEmail, message) VALUES (?, ?, ?)',
+      [senderEmail, receiverEmail, message],
+      (err, result) => {
+          if (err) {
+              console.error('Database error:', err);
+              return res.status(500).json({ error: 'Failed to send offer' });
+          }
+          res.status(200).json({ success: true,});
+      }
+  );
+});
+
+//view offer
+app.get('/offers/sent/:email', (req, res) => {
+  const senderEmail = req.params.email;
+
+  db.query(
+      'SELECT * FROM offers WHERE senderEmail = ? ORDER BY created_at DESC',
+      [senderEmail],
+      (err, results) => {
+          if (err) {
+              console.error('Database error:', err);
+              return res.status(500).json({ error: 'Failed to fetch sent offers' });
+          }
+          res.status(200).json(results);
+      }
+  );
+});
+
 // Start the server
 const PORT = 5000;
 app.listen(PORT, () => {

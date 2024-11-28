@@ -1,0 +1,31 @@
+.sent-offers-page {
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.offer-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.offer-item {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.offer-item p {
+    margin: 5px 0;
+}
+
+.offer-item small {
+    color: #555;
+}
