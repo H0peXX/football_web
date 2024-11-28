@@ -100,6 +100,20 @@ const LinkedInHomePage = () => {
     }
   };
 
+  // Delete a comment
+  const deleteComment = async (offerId, commentId) => {
+    try {
+      const response = await fetch(`http://localhost:5000/offers/${offerId}/comments/${commentId}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        fetchComments(offerId); // Refresh comments after deleting
+      }
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+    }
+  };
+
   return (
     <div style={{ fontFamily: "Arial, sans-serif", backgroundColor: "#f3f6fa", padding: "20px" }}>
       <header style={{ backgroundColor: "#ffffff", padding: "15px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}>
@@ -171,6 +185,12 @@ const LinkedInHomePage = () => {
                               style={{ padding: "5px 10px", backgroundColor: "#ffa500", color: "#fff", border: "none", borderRadius: "3px" }}
                             >
                               Edit
+                            </button>
+                            <button
+                              onClick={() => deleteComment(transfer.id, comment.id)}
+                              style={{ padding: "5px 10px", backgroundColor: "#dc3545", color: "#fff", border: "none", borderRadius: "3px", marginLeft: "5px" }}
+                            >
+                              Delete
                             </button>
                           </div>
                         )}

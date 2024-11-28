@@ -505,6 +505,25 @@ app.put('/offers/:offerId/comments/:commentId', (req, res) => {
   });
 });
 
+//delete trasfer comment
+app.delete('/offers/:offerId/comments/:commentId', (req, res) => {
+  const { offerId, commentId } = req.params;
+
+  const query = 'DELETE FROM comments_transfer WHERE id = ? AND offer_id = ?';
+  db.query(query, [commentId, offerId], (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Error deleting comment');
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).send('Comment not found');
+    }
+
+    res.send('Comment deleted successfully');
+  });
+});
+
 // Start the server
 const PORT = 5000;
 app.listen(PORT, () => {
