@@ -411,6 +411,30 @@ app.put('/offers/:id/reject', (req, res) => {
   });
 });
 
+//fetch sign
+app.get('/offers/signed/:email', (req, res) => {
+  const playerEmail = req.params.email;
+
+  const query = `
+      SELECT * FROM offers
+      WHERE receiverEmail = ? AND status = 'accepted'
+      LIMIT 1
+  `;
+
+  db.query(query, [playerEmail], (err, result) => {
+      if (err) {
+          console.error('Error fetching signed offer:', err);
+          return res.status(500).json({ error: 'Failed to fetch signed offer' });
+      }
+
+      if (result.length === 0) {
+          return res.status(404).json({ error: 'No signed offer found for this player' });
+      }
+
+      res.json(result[0]);
+  });
+});
+
 // Start the server
 const PORT = 5000;
 app.listen(PORT, () => {

@@ -15,6 +15,7 @@ const PlayerDetail = () => {
     const [name, setName] = useState("");
     const [newComment, setNewComment] = useState('');
     const [editing, setEditing] = useState(false);
+    const [signedOffer, setSignedOffer] = useState(null);
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -225,6 +226,25 @@ const PlayerDetail = () => {
         }
     };
 
+    //fetch Sign
+    useEffect(() => {
+        const fetchSignedOffer = async () => {
+            try {
+                const response = await fetch(`http://localhost:5000/offers/signed/${encodeURIComponent(email)}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setSignedOffer(data);
+                } else {
+                    setSignedOffer(null);
+                }
+            } catch (error) {
+                console.error('Error fetching signed offer:', error);
+            }
+        };
+
+        fetchSignedOffer();
+    }, [email]);
+
     const handleDelete = async () => {
         if (!window.confirm("Are you sure you want to delete this player?")) return;
 
@@ -292,6 +312,17 @@ const PlayerDetail = () => {
                     <h1>{`${player.firstname} ${player.lastname}`}</h1>
                     <p>Email: {player.email}</p>
                     <p>Role: {player.role}</p>
+                    <div className="offer-status">
+                        {signedOffer ? (
+                            <p>
+                                <strong>Offer Signed!</strong> Signed by: {signedOffer.senderEmail}
+                                <br />
+                                Message: {signedOffer.message}
+                            </p>
+                        ) : (
+                            <p>No offer signed yet.</p>
+                        )}
+                    </div>
                     <button onClick={() => navigate(`/players/${encodeURIComponent(email)}/view-offers`)}>View Offers</button>
                     <button onClick={() => setEditing(true)}>Edit</button>
                     <button onClick={handleDelete}>Delete</button>
