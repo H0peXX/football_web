@@ -383,6 +383,34 @@ app.get('/offers/player/:email', (req, res) => {
   });
 });
 
+// Accept offer
+app.put('/offers/:id/accept', (req, res) => {
+  const offerId = req.params.id;
+  
+  const query = `UPDATE offers SET status = 'accepted' WHERE id = ?`;
+  db.query(query, [offerId], (err, result) => {
+      if (err) {
+          console.error('Error accepting offer:', err);
+          return res.status(500).json({ error: 'Failed to accept offer' });
+      }
+      res.json({ message: 'Offer accepted successfully' });
+  });
+});
+
+//Reject offer
+app.put('/offers/:id/reject', (req, res) => {
+  const offerId = req.params.id;
+
+  const query = `UPDATE offers SET status = 'rejected' WHERE id = ?`;
+  db.query(query, [offerId], (err, result) => {
+      if (err) {
+          console.error('Error rejecting offer:', err);
+          return res.status(500).json({ error: 'Failed to reject offer' });
+      }
+      res.json({ message: 'Offer rejected successfully' });
+  });
+});
+
 // Start the server
 const PORT = 5000;
 app.listen(PORT, () => {
