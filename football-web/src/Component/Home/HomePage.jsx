@@ -80,23 +80,6 @@ const LinkedInHomePage = () => {
               boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
             }}
           >
-            <textarea
-              placeholder="Share an article, photo, or update"
-              style={{ width: "100%", height: "60px", padding: "10px", fontSize: "14px", borderRadius: "5px" }}
-            ></textarea>
-            <button
-              style={{
-                marginTop: "10px",
-                padding: "10px 20px",
-                backgroundColor: "#0073b1",
-                color: "#fff",
-                border: "none",
-                borderRadius: "5px",
-                cursor: "pointer",
-              }}
-            >
-              Post
-            </button>
           </div>
 
           {/* Latest Transfers Section */}
