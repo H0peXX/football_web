@@ -292,6 +292,7 @@ const PlayerDetail = () => {
                     <h1>{`${player.firstname} ${player.lastname}`}</h1>
                     <p>Email: {player.email}</p>
                     <p>Role: {player.role}</p>
+                    <button onClick={() => navigate(`/players/${encodeURIComponent(email)}/view-offers`)}>View Offers</button>
                     <button onClick={() => setEditing(true)}>Edit</button>
                     <button onClick={handleDelete}>Delete</button>
                     <button onClick={() => setShowOfferModal(true)}>Send Offer</button>

@@ -350,6 +350,39 @@ app.put('/offers/:id', (req, res) => {
   );
 });
 
+//delete sent offer
+app.delete('/offers/:id', (req, res) => {
+  const offerId = req.params.id;
+
+  db.query('DELETE FROM offers WHERE id = ?', [offerId], (err, result) => {
+      if (err) {
+          console.error('Failed to delete offer:', err);
+          return res.status(500).json({ error: 'Failed to delete offer' });
+      }
+
+      if (result.affectedRows > 0) {
+          res.status(200).json({ message: 'Offer deleted successfully' });
+      } else {
+          res.status(404).json({ error: 'Offer not found' });
+      }
+  });
+});
+
+//view retrieve offer
+app.get('/offers/player/:email', (req, res) => {
+  const playerEmail = decodeURIComponent(req.params.email);
+
+  const query = `SELECT * FROM offers WHERE receiverEmail = ?`;
+  db.query(query, [playerEmail], (err, results) => {
+      if (err) {
+          console.error('Error fetching offers:', err);
+          res.status(500).json({ error: 'Failed to fetch offers' });
+          return;
+      }
+      res.json(results);
+  });
+});
+
 // Start the server
 const PORT = 5000;
 app.listen(PORT, () => {

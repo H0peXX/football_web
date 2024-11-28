@@ -1,0 +1,36 @@
+.view-offers-page {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.offers-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.offer-item {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.offer-item p {
+    margin: 5px 0;
+}
+
+button {
+    margin-top: 10px;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: 0.9;
+}

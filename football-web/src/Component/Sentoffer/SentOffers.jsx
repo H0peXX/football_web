@@ -41,12 +41,31 @@ const SentOffers = () => {
             });
     };
 
-    const handleEditClick = (offerId, currentMessage) => {
+    const handleDeleteOffer = async (offerId) => {
+        if (!window.confirm("Are you sure you want to delete this offer?")) return;
+
+        try {
+            const response = await fetch(`http://localhost:5000/offers/${offerId}`, {
+                method: "DELETE",
+            });
+
+            if (response.ok) {
+                setOffers((prev) => prev.filter((offer) => offer.id !== offerId));
+                alert("Offer deleted successfully!");
+            } else {
+                alert("Failed to delete offer");
+            }
+        } catch (error) {
+            console.error("Failed to delete offer:", error);
+        }
+    };
+
+    const handleEditOffer = (offerId, currentMessage) => {
         setEditingOfferId(offerId);
         setEditedMessage(currentMessage);
     };
 
-    const handleSaveClick = async (offerId) => {
+    const handleSaveEditedOffer = async (offerId) => {
         if (!editedMessage.trim()) {
             alert("Message cannot be empty.");
             return;
@@ -65,8 +84,8 @@ const SentOffers = () => {
                         offer.id === offerId ? { ...offer, message: editedMessage } : offer
                     )
                 );
-                alert("Offer updated successfully!");
-                setEditingOfferId(null); // Exit edit mode
+                setEditingOfferId(null);
+                setEditedMessage("");
             } else {
                 alert("Failed to update offer");
             }
@@ -88,23 +107,24 @@ const SentOffers = () => {
                                 <strong>To:</strong> {offer.receiverEmail}
                             </p>
                             {editingOfferId === offer.id ? (
-                                <>
+                                <div>
                                     <textarea
                                         value={editedMessage}
                                         onChange={(e) => setEditedMessage(e.target.value)}
                                     />
-                                    <button onClick={() => handleSaveClick(offer.id)}>Save</button>
+                                    <button onClick={() => handleSaveEditedOffer(offer.id)}>Save</button>
                                     <button onClick={() => setEditingOfferId(null)}>Cancel</button>
-                                </>
+                                </div>
                             ) : (
                                 <>
                                     <p>
                                         <strong>Message:</strong> {offer.message}
                                     </p>
-                                    <small>Sent on: {new Date(offer.created_at).toLocaleString()}</small>
-                                    <button onClick={() => handleEditClick(offer.id, offer.message)}>
-                                        Edit
-                                    </button>
+                                    <small>
+                                        Sent on: {new Date(offer.created_at).toLocaleString()}
+                                    </small>
+                                    <button onClick={() => handleEditOffer(offer.id, offer.message)}>Edit</button>
+                                    <button onClick={() => handleDeleteOffer(offer.id)}>Delete</button>
                                 </>
                             )}
                         </li>
