@@ -456,6 +456,35 @@ app.get('/offers/latest', (req, res) => {
   });
 });
 
+//get transfer comment
+app.get('/offers/:id/comments', (req, res) => {
+  const offerId = req.params.id;
+
+  const query = `SELECT * FROM comments_transfer WHERE offer_id = ? ORDER BY created_at ASC`;
+  db.query(query, [offerId], (err, results) => {
+      if (err) {
+          console.error('Error fetching comments:', err);
+          return res.status(500).json({ error: 'Failed to fetch comments' });
+      }
+      res.json(results);
+  });
+});
+
+//add transfer comment
+app.post('/offers/:id/comments', (req, res) => {
+  const offerId = req.params.id;
+  const { comment, user_email } = req.body;
+
+  const query = `INSERT INTO comments_transfer (offer_id, comment, user_email, created_at) VALUES (?, ?, ?, NOW())`;
+  db.query(query, [offerId, comment, user_email], (err, result) => {
+      if (err) {
+          console.error('Error adding comment:', err);
+          return res.status(500).json({ error: 'Failed to add comment' });
+      }
+      res.json({ message: 'Comment added successfully', commentId: result.insertId });
+  });
+});
+
 // Start the server
 const PORT = 5000;
 app.listen(PORT, () => {

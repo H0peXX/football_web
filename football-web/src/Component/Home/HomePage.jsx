@@ -4,10 +4,18 @@ import { useNavigate } from "react-router-dom";
 const LinkedInHomePage = () => {
   const [name, setName] = useState("");
   const [latestTransfers, setLatestTransfers] = useState([]);
+  const [comments, setComments] = useState({});
+  const [newComment, setNewComment] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch user data
+    latestTransfers.forEach((transfer) => {
+      fetchComments(transfer.id); // Fetch comments for each transfer when the page loads
+    });
+  }, [latestTransfers]);
+
+  // Fetch user data
+  useEffect(() => {
     fetch("http://localhost:5000", {
       method: "GET",
       credentials: "include",
@@ -23,8 +31,8 @@ const LinkedInHomePage = () => {
       .catch((err) => console.error("Error fetching user data:", err));
   }, [navigate]);
 
+  // Fetch latest transfers
   useEffect(() => {
-    // Fetch latest transfers
     const fetchLatestTransfers = async () => {
       try {
         const response = await fetch("http://localhost:5000/offers/latest");
@@ -36,9 +44,38 @@ const LinkedInHomePage = () => {
         console.error("Error fetching latest transfers:", error);
       }
     };
-
     fetchLatestTransfers();
   }, []);
+
+  // Fetch comments for a specific transfer
+  const fetchComments = async (offerId) => {
+    try {
+      const response = await fetch(`http://localhost:5000/offers/${offerId}/comments`);
+      if (response.ok) {
+        const data = await response.json();
+        setComments((prev) => ({ ...prev, [offerId]: data }));
+      }
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    }
+  };
+
+  // Post a new comment
+  const postComment = async (offerId) => {
+    try {
+      const response = await fetch(`http://localhost:5000/offers/${offerId}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ comment: newComment[offerId], user_email: name }),
+      });
+      if (response.ok) {
+        fetchComments(offerId); // Refresh comments after posting
+        setNewComment((prev) => ({ ...prev, [offerId]: "" })); // Clear input field
+      }
+    } catch (error) {
+      console.error("Error posting comment:", error);
+    }
+  };
 
   return (
     <div style={{ fontFamily: "Arial, sans-serif", backgroundColor: "#f3f6fa", padding: "20px" }}>
@@ -60,46 +97,49 @@ const LinkedInHomePage = () => {
             <h3 style={{ fontSize: "18px", margin: "0 0 10px" }}>{name || "Your Name"}</h3>
             <p style={{ fontSize: "14px", color: "#555" }}>user info</p>
           </div>
-          <div>
-            <p>
-              <strong>8</strong> more info
-            </p>
-            <p>
-              <strong>15</strong> Views of your post
-            </p>
-          </div>
-          <button>View detail profile</button>
         </aside>
 
         <main style={{ width: "75%" }}>
-          <div
-            style={{
-              backgroundColor: "#ffffff",
-              padding: "15px",
-              marginBottom: "20px",
-              boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-            }}
-          >
-          </div>
+          <div style={{ backgroundColor: "#ffffff", padding: "15px", marginBottom: "20px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}></div>
 
           {/* Latest Transfers Section */}
-          <div
-            style={{
-              backgroundColor: "#ffffff",
-              padding: "15px",
-              marginBottom: "20px",
-              boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-            }}
-          >
+          <div style={{ backgroundColor: "#ffffff", padding: "15px", marginBottom: "20px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}>
             <h4 style={{ margin: "0 0 10px" }}>Latest Transfers</h4>
             {latestTransfers.map((transfer) => (
-              <div key={transfer.id} style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}>
-                <div>
-                  <p>
-                    <strong>{transfer.firstname} {transfer.lastname}</strong> was signed by{" "}
-                    <strong>{transfer.senderEmail}</strong>.
-                  </p>
-                  <p style={{ fontSize: "14px", color: "#555" }}>{new Date(transfer.created_at).toLocaleString()}</p>
+              <div key={transfer.id} style={{ marginBottom: "20px" }}>
+                <div style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
+                  <div>
+                    <p>
+                      <strong>{transfer.firstname} {transfer.lastname}</strong> was signed by{" "}
+                      <strong>{transfer.senderEmail}</strong>.
+                    </p>
+                    <p style={{ fontSize: "14px", color: "#555" }}>{new Date(transfer.created_at).toLocaleString()}</p>
+                  </div>
+                </div>
+
+                {/* Comments Section */}
+                <div style={{ marginTop: "10px", padding: "10px", backgroundColor: "#f9f9f9", borderRadius: "5px" }}>
+                  <h5>Comments</h5>
+                  <div>
+                    {comments[transfer.id]?.map((comment) => (
+                      <div key={comment.id} style={{ marginBottom: "10px" }}>
+                        <strong>{comment.user_email}</strong>: {comment.comment}
+                        <p style={{ fontSize: "12px", color: "#aaa" }}>{new Date(comment.created_at).toLocaleString()}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <textarea
+                    value={newComment[transfer.id] || ""}
+                    onChange={(e) => setNewComment((prev) => ({ ...prev, [transfer.id]: e.target.value }))}
+                    placeholder="Add a comment"
+                    style={{ width: "100%", marginTop: "10px", padding: "5px" }}
+                  />
+                  <button
+                    onClick={() => postComment(transfer.id)}
+                    style={{ marginTop: "5px", padding: "5px 10px", backgroundColor: "#0073b1", color: "#fff", border: "none", borderRadius: "3px" }}
+                  >
+                    Post
+                  </button>
                 </div>
               </div>
             ))}
