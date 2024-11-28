@@ -485,6 +485,26 @@ app.post('/offers/:id/comments', (req, res) => {
   });
 });
 
+//update transfer comment
+app.put('/offers/:offerId/comments/:commentId', (req, res) => {
+  const { offerId, commentId } = req.params;
+  const { comment } = req.body;
+
+  const query = 'UPDATE comments_transfer SET comment = ? WHERE id = ? AND offer_id = ?';
+  db.query(query, [comment, commentId, offerId], (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Error updating comment');
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).send('Comment not found');
+    }
+
+    res.send('Comment updated successfully');
+  });
+});
+
 // Start the server
 const PORT = 5000;
 app.listen(PORT, () => {

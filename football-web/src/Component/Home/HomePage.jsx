@@ -6,6 +6,7 @@ const LinkedInHomePage = () => {
   const [latestTransfers, setLatestTransfers] = useState([]);
   const [comments, setComments] = useState({});
   const [newComment, setNewComment] = useState({});
+  const [editingComment, setEditingComment] = useState(null); // State to track the comment being edited
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -77,6 +78,28 @@ const LinkedInHomePage = () => {
     }
   };
 
+  // Edit a comment
+  const editComment = (comment) => {
+    setEditingComment(comment); // Set the comment to edit
+  };
+
+  // Save the edited comment
+  const saveEditedComment = async (offerId, commentId) => {
+    try {
+      const response = await fetch(`http://localhost:5000/offers/${offerId}/comments/${commentId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ comment: editingComment.comment }),
+      });
+      if (response.ok) {
+        fetchComments(offerId); // Refresh comments after saving
+        setEditingComment(null); // Clear the editing state
+      }
+    } catch (error) {
+      console.error("Error saving edited comment:", error);
+    }
+  };
+
   return (
     <div style={{ fontFamily: "Arial, sans-serif", backgroundColor: "#f3f6fa", padding: "20px" }}>
       <header style={{ backgroundColor: "#ffffff", padding: "15px", boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}>
@@ -123,8 +146,34 @@ const LinkedInHomePage = () => {
                   <div>
                     {comments[transfer.id]?.map((comment) => (
                       <div key={comment.id} style={{ marginBottom: "10px" }}>
-                        <strong>{comment.user_email}</strong>: {comment.comment}
-                        <p style={{ fontSize: "12px", color: "#aaa" }}>{new Date(comment.created_at).toLocaleString()}</p>
+                        {editingComment && editingComment.id === comment.id ? (
+                          <div>
+                            <textarea
+                              value={editingComment.comment}
+                              onChange={(e) => setEditingComment({ ...editingComment, comment: e.target.value })}
+                              style={{ width: "100%", marginBottom: "10px" }}
+                            />
+                            <button
+                              onClick={() => saveEditedComment(transfer.id, comment.id)}
+                              style={{ padding: "5px 10px", backgroundColor: "#0073b1", color: "#fff", border: "none", borderRadius: "3px" }}
+                            >
+                              Save
+                            </button>
+                          </div>
+                        ) : (
+                          <div>
+                            <strong>{comment.user_email}</strong>: {comment.comment}
+                            <p style={{ fontSize: "12px", color: "#aaa" }}>
+                              {new Date(comment.created_at).toLocaleString()}
+                            </p>
+                            <button
+                              onClick={() => editComment(comment)}
+                              style={{ padding: "5px 10px", backgroundColor: "#ffa500", color: "#fff", border: "none", borderRadius: "3px" }}
+                            >
+                              Edit
+                            </button>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
