@@ -353,11 +353,11 @@ const PlayerDetail = () => {
                                         <small>{new Date(comment.created_at).toLocaleString()}</small>
                                         {userrole === "Admin" && (
                                             <>
-                                            <button onClick={() => handleEditComment(comment.id, comment.comment)}>Edit</button>
-                                        <button onClick={() => handleDeleteComment(comment.id)}>Delete</button>
-                                        </>
+                                                <button onClick={() => handleEditComment(comment.id, comment.comment)}>Edit</button>
+                                                <button onClick={() => handleDeleteComment(comment.id)}>Delete</button>
+                                            </>
                                         )}
-                                        
+
                                     </>
                                 )}
                             </div>
