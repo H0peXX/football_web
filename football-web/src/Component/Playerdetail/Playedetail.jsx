@@ -13,6 +13,7 @@ const PlayerDetail = () => {
     const [loading, setLoading] = useState(true);
     const [comments, setComments] = useState([]);
     const [name, setName] = useState("");
+    const [userrole, setRole] = useState("");
     const [newComment, setNewComment] = useState('');
     const [editing, setEditing] = useState(false);
     const [formData, setFormData] = useState({
@@ -24,19 +25,22 @@ const PlayerDetail = () => {
 
     useEffect(() => {
         fetch("http://localhost:5000", {
-          method: "GET",
-          credentials: "include", // Send cookies with request
+            method: "GET",
+            credentials: "include", // Send cookies with request
         })
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.valid) {
-              setName(data.email); // Set user's email as name
-            } else {
-              alert("Not logged in"); // Redirect if not authenticated
-            }
-          })
-          .catch((err) => console.error("Error fetching user data:", err));
-      }, [navigate]);
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.valid) {
+                    setName(data.name); // Set user's email as name
+                    setRole(data.role); // Set user's email as name
+
+                    console.log(data)
+                } else {
+                    alert("Not logged in"); // Redirect if not authenticated
+                }
+            })
+            .catch((err) => console.error("Error fetching user data:", err));
+    }, [navigate]);
 
     useEffect(() => {
         fetch(`http://localhost:5000/players/${encodeURIComponent(email)}`)
@@ -110,20 +114,20 @@ const PlayerDetail = () => {
         setEditingCommentId(commentId);
         setEditedComment(currentComment);
     };
-    
+
     const handleSaveEditedComment = async (commentId) => {
         if (!editedComment.trim()) {
             alert('Edited comment cannot be empty.');
             return;
         }
-    
+
         try {
             const response = await fetch(`http://localhost:5000/comments/${commentId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ comment: editedComment }),
             });
-    
+
             if (response.ok) {
                 const updatedComment = await response.json();
                 setComments((prev) =>
@@ -144,12 +148,12 @@ const PlayerDetail = () => {
     //comment delete
     const handleDeleteComment = async (commentId) => {
         if (!window.confirm("Are you sure you want to delete this comment?")) return;
-    
+
         try {
             const response = await fetch(`http://localhost:5000/comments/${commentId}`, {
                 method: 'DELETE',
             });
-    
+
             if (response.ok) {
                 setComments((prev) => prev.filter((comment) => comment.id !== commentId));
                 alert('Comment deleted successfully!');
@@ -160,20 +164,20 @@ const PlayerDetail = () => {
             console.error('Failed to delete comment:', error);
         }
     };
-    
+
     const handleSendOffer = async () => {
         if (!offerMessage.trim()) {
             alert('Offer message cannot be empty.');
             return;
         }
-    
+
         try {
             console.log('Sending offer:', {
                 senderEmail: name,
                 receiverEmail: email,
                 message: offerMessage,
             });
-    
+
             const response = await fetch('http://localhost:5000/offers', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -183,10 +187,10 @@ const PlayerDetail = () => {
                     message: offerMessage,
                 }),
             });
-    
+
             const result = await response.json();
             console.log('Response:', result);
-    
+
             if (response.ok) {
                 alert('Offer sent successfully!');
                 setShowOfferModal(false);
@@ -292,28 +296,35 @@ const PlayerDetail = () => {
                     <h1>{`${player.firstname} ${player.lastname}`}</h1>
                     <p>Email: {player.email}</p>
                     <p>Role: {player.role}</p>
-                    <button onClick={() => setEditing(true)}>Edit</button>
-                    <button onClick={handleDelete}>Delete</button>
+                    {userrole === "Admin" && (
+                        <>
+                            <button onClick={() => setEditing(true)}>Edit</button>
+                            <button onClick={handleDelete}>Delete</button>
+                        </>
+                    )}
+
+                    {/* <button onClick={() => setEditing(true)}>Edit</button>
+                    <button onClick={handleDelete}>Delete</button> */}
                     <button onClick={() => setShowOfferModal(true)}>Send Offer</button>
                 </>
             )}
             {/* Offer Modal */}
-{showOfferModal && (
-    <div className="offer-modal">
-        <div className="modal-content">
-            <h2>Send Offer to {player.firstname} {player.lastname}</h2>
-            <textarea
-                value={offerMessage}
-                onChange={(e) => setOfferMessage(e.target.value)}
-                placeholder="Write your offer message here..."
-            />
-            <div className="modal-actions">
-                <button onClick={handleSendOffer}>Send</button>
-                <button onClick={() => setShowOfferModal(false)}>Cancel</button>
-            </div>
-        </div>
-    </div>
-)}
+            {showOfferModal && (
+                <div className="offer-modal">
+                    <div className="modal-content">
+                        <h2>Send Offer to {player.firstname} {player.lastname}</h2>
+                        <textarea
+                            value={offerMessage}
+                            onChange={(e) => setOfferMessage(e.target.value)}
+                            placeholder="Write your offer message here..."
+                        />
+                        <div className="modal-actions">
+                            <button onClick={handleSendOffer}>Send</button>
+                            <button onClick={() => setShowOfferModal(false)}>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Comments Section */}
             <div className="comments-section">
@@ -321,34 +332,39 @@ const PlayerDetail = () => {
 
                 {/* Comments List */}
                 <div className="comments-list">
-                {comments.length > 0 ? (
-                comments.map((comment) => (
-             <div key={comment.id} className="comment">
-                    {editingCommentId === comment.id ? (
-                <div>
-                    <textarea
-                        value={editedComment}
-                        onChange={(e) => setEditedComment(e.target.value)}
-                    />
-                    <button onClick={() => handleSaveEditedComment(comment.id)}>Save</button>
-                    <button onClick={() => setEditingCommentId(null)}>Cancel</button>
-                </div>
-            ) : (
-                <>
-                    <p>
-                        <strong>{comment.email}</strong>:
-                    </p>
-                    <p>{comment.comment}</p>
-                    <small>{new Date(comment.created_at).toLocaleString()}</small>
-                    <button onClick={() => handleEditComment(comment.id, comment.comment)}>Edit</button>
-                    <button onClick={() => handleDeleteComment(comment.id)}>Delete</button>
-                </>
-            )}
-        </div>
-    ))
-) : (
-    <p>No comments yet. Be the first to comment!</p>
-)}
+                    {comments.length > 0 ? (
+                        comments.map((comment) => (
+                            <div key={comment.id} className="comment">
+                                {editingCommentId === comment.id ? (
+                                    <div>
+                                        <textarea
+                                            value={editedComment}
+                                            onChange={(e) => setEditedComment(e.target.value)}
+                                        />
+                                        <button onClick={() => handleSaveEditedComment(comment.id)}>Save</button>
+                                        <button onClick={() => setEditingCommentId(null)}>Cancel</button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <p>
+                                            <strong>{comment.email}</strong>:
+                                        </p>
+                                        <p>{comment.comment}</p>
+                                        <small>{new Date(comment.created_at).toLocaleString()}</small>
+                                        {userrole === "Admin" && (
+                                            <>
+                                            <button onClick={() => handleEditComment(comment.id, comment.comment)}>Edit</button>
+                                        <button onClick={() => handleDeleteComment(comment.id)}>Delete</button>
+                                        </>
+                                        )}
+                                        
+                                    </>
+                                )}
+                            </div>
+                        ))
+                    ) : (
+                        <p>No comments yet. Be the first to comment!</p>
+                    )}
                 </div>
 
                 {/* Add Comment Form */}

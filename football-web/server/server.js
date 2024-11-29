@@ -80,7 +80,8 @@ app.post("/login", async (req, res) => {
       const match = await bcrypt.compare(password, user.password);
       if (match) {
         req.session.email = user.email; // Store the username in the session
-        console.log("Session username:", req.session.email);
+        req.session.role = user.role;
+        console.log("Session username:", req.session.email,", role: ",req.session.role);
         
         return res.status(200).json({ message: "Login successful!", user });
       } else {
@@ -95,7 +96,7 @@ app.post("/login", async (req, res) => {
 
 // Signup Route
 app.post("/signup", async (req, res) => {
-  const { email, password, firstName, lastName } = req.body;
+  const { email, password, firstName, lastName , position } = req.body;
 
   // Validate input fields
   if (!email || !password || !firstName || !lastName) {
@@ -103,35 +104,40 @@ app.post("/signup", async (req, res) => {
   }
 
   // Check if the user already exists
-  db.query("SELECT * FROM user WHERE email = ?", [email], async (err, results) => {
+  // Check if the user already exists
+db.query("SELECT * FROM user WHERE email = ?", [email], async (err, results) => {
+  if (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+
+  if (results.length > 0) {
+    return res.status(409).json({ message: "User already exists!" });
+  }
+
+  // Hash the password
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  // Define the default role
+  const defaultRole = 'user'; // Adjust this as needed
+
+  // Insert the new user into the database
+  const query = "INSERT INTO user (firstname, lastname, email, password, position, role) VALUES (?, ?, ?, ?, ?, ?)";
+  db.query(query, [firstName, lastName, email, hashedPassword, position, defaultRole], (err) => {
     if (err) {
       console.error("Database error:", err);
       return res.status(500).json({ message: "Internal server error" });
     }
 
-    if (results.length > 0) {
-      return res.status(409).json({ message: "User already exists!" });
-    }
-
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Insert the new user into the database
-    const query = "INSERT INTO user (firstname, lastname, email, password) VALUES (?, ?, ?, ?)";
-    db.query(query, [firstName, lastName, email, hashedPassword], (err) => {
-      if (err) {
-        console.error("Database error:", err);
-        return res.status(500).json({ message: "Internal server error" });
-      }
-
-      return res.status(201).json({ message: "Signup successful!" });
-    });
+    return res.status(201).json({ message: "Signup successful!" });
   });
+});
+
 });
 
 app.get('/', (req, res) => {
   if (req.session.email) {
-    return res.json({ valid: true, email: req.session.email })
+    return res.json({ valid: true, email: req.session.email ,role: req.session.role})
   } else {
     return res.json({ valid: false })
   }
