@@ -59,6 +59,22 @@ function NavBar() {
             Home
           </NavLink>
         </li>
+        <li>
+          <NavLink
+            to="/players"
+            className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+          >
+            Playerlisting
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to="/offers/sent"
+            className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+          >
+            Sentoffer
+          </NavLink>
+        </li>
         {!isLoggedIn ? (
           <>
             <li>
@@ -75,22 +91,6 @@ function NavBar() {
                 className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
               >
                 Signup
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to="/players"
-                className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
-              >
-                Playerlisting
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to="/offers/sent"
-                className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
-              >
-                Sentoffer
               </NavLink>
             </li>
           </>

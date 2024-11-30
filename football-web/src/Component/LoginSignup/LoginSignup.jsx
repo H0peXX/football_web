@@ -59,6 +59,7 @@ const LoginSignup = ({ action }) => {
                     lastName: "",
                     email: "",
                     password: "",
+                    position: ""
                 });
                 navigate("/home");
             } else {
@@ -109,6 +110,17 @@ const LoginSignup = ({ action }) => {
                                     onChange={handleInputChange} 
                                 />
                             </div>
+                            <div className="input">
+                                <img src={user_icon} alt="User icon" />
+                                <input 
+                                    type="text" 
+                                    placeholder="Position" 
+                                    name="position" 
+                                    value={formData.position} 
+                                    onChange={handleInputChange} 
+                                />
+                            </div>
+                            
                         </>
                     )}
                     <div className="input">
