@@ -7,38 +7,53 @@ const SentOffers = () => {
     const [offers, setOffers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [userEmail, setUserEmail] = useState("");
+    const [userRole, setUserRole] = useState("");
     const [editingOfferId, setEditingOfferId] = useState(null);
     const [editedMessage, setEditedMessage] = useState("");
 
     useEffect(() => {
-        fetch("http://localhost:5000", {
-            method: "GET",
-            credentials: "include",
-        })
-            .then((res) => res.json())
-            .then((data) => {
+        const fetchUserDetails = async () => {
+            try {
+                const response = await fetch("http://localhost:5000", {
+                    method: "GET",
+                    credentials: "include",
+                });
+
+                const data = await response.json();
+
                 if (data.valid) {
                     setUserEmail(data.email);
-                    fetchSentOffers(data.email);
+                    setUserRole(data.role);
+
+                    if (data.role === "coach") {
+                        fetchSentOffers(data.email);
+                    } else {
+                        alert("You are not authorized to view this page.");
+                        navigate("/home");
+                    }
                 } else {
-                    alert("Not logged in");
+                    alert("Not logged in.");
                     navigate("/login");
                 }
-            })
-            .catch((err) => console.error("Error fetching user data:", err));
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+                navigate("/login");
+            }
+        };
+
+        fetchUserDetails();
     }, [navigate]);
 
-    const fetchSentOffers = (email) => {
-        fetch(`http://localhost:5000/offers/sent/${encodeURIComponent(email)}`)
-            .then((response) => response.json())
-            .then((data) => {
-                setOffers(data);
-                setLoading(false);
-            })
-            .catch((error) => {
-                console.error("Error fetching sent offers:", error);
-                setLoading(false);
-            });
+    const fetchSentOffers = async (email) => {
+        try {
+            const response = await fetch(`http://localhost:5000/offers/sent/${encodeURIComponent(email)}`);
+            const data = await response.json();
+            setOffers(data);
+        } catch (error) {
+            console.error("Error fetching sent offers:", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleDeleteOffer = async (offerId) => {
@@ -50,10 +65,10 @@ const SentOffers = () => {
             });
 
             if (response.ok) {
-                setOffers((prev) => prev.filter((offer) => offer.id !== offerId));
+                setOffers((prevOffers) => prevOffers.filter((offer) => offer.id !== offerId));
                 alert("Offer deleted successfully!");
             } else {
-                alert("Failed to delete offer");
+                alert("Failed to delete offer.");
             }
         } catch (error) {
             console.error("Failed to delete offer:", error);
@@ -79,15 +94,16 @@ const SentOffers = () => {
             });
 
             if (response.ok) {
-                setOffers((prev) =>
-                    prev.map((offer) =>
+                setOffers((prevOffers) =>
+                    prevOffers.map((offer) =>
                         offer.id === offerId ? { ...offer, message: editedMessage } : offer
                     )
                 );
                 setEditingOfferId(null);
                 setEditedMessage("");
+                alert("Offer updated successfully!");
             } else {
-                alert("Failed to update offer");
+                alert("Failed to update offer.");
             }
         } catch (error) {
             console.error("Failed to update offer:", error);

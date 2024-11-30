@@ -5,7 +5,24 @@ import "./navbar.css";
 function NavBar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
-
+  const [name, setName] = useState("");
+  const [role, setRole] = useState("")
+  useEffect(() => {
+    fetch("http://localhost:5000", {
+      method: "GET",
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.valid) {
+          setName(data.email);
+          setRole(data.role);
+        } else {
+          navigate("/login");
+        }
+      })
+      .catch((err) => console.error("Error fetching user data:", err));
+  }, [navigate]);
   // Check if the user is logged in
   useEffect(() => {
     const checkLoginStatus = async () => {
@@ -59,6 +76,8 @@ function NavBar() {
             Home
           </NavLink>
         </li>
+
+        {/* Conditionally render Login/Signup or Logout based on login status */}
         {!isLoggedIn ? (
           <>
             <li>
@@ -77,6 +96,9 @@ function NavBar() {
                 Signup
               </NavLink>
             </li>
+          </>
+        ) : (
+          <>
             <li>
               <NavLink
                 to="/players"
@@ -85,26 +107,28 @@ function NavBar() {
                 Playerlisting
               </NavLink>
             </li>
+            {role === "coach" && (
+              <li>
+                <NavLink
+                  to="/offers/sent"
+                  className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+                >
+                  Sentoffer
+                </NavLink>
+              </li>
+            )}
+
             <li>
-              <NavLink
-                to="/offers/sent"
-                className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+              <span
+                onClick={handleLogout}
+                className="nav-link logout-link"
+                role="button"
+                tabIndex="0"
               >
-                Sentoffer
-              </NavLink>
+                Logout
+              </span>
             </li>
           </>
-        ) : (
-          <li>
-            <span
-              onClick={handleLogout}
-              className="nav-link logout-link"
-              role="button"
-              tabIndex="0"
-            >
-              Logout
-            </span>
-          </li>
         )}
       </ul>
     </nav>

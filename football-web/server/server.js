@@ -11,7 +11,7 @@ const app = express();
 // setup
 app.use(cookieParser());
 app.use(bodyParser.json());
-  
+
 
 
 app.use(session({
@@ -49,7 +49,7 @@ db.connect((err) => {
 // Enable CORS
 app.use(cors({
   origin: ["http://localhost:3000"], // React frontend URL
-  methods: ["GET", "POST", "PUT","DELETE"],
+  methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
 }));
 
@@ -80,8 +80,9 @@ app.post("/login", async (req, res) => {
       const match = await bcrypt.compare(password, user.password);
       if (match) {
         req.session.email = user.email; // Store the username in the session
+        req.session.role = user.role;
         console.log("Session username:", req.session.email);
-        
+
         return res.status(200).json({ message: "Login successful!", user });
       } else {
         return res.status(401).json({ message: "Invalid email or password" });
@@ -131,7 +132,7 @@ app.post("/signup", async (req, res) => {
 
 app.get('/', (req, res) => {
   if (req.session.email) {
-    return res.json({ valid: true, email: req.session.email })
+    return res.json({ valid: true, email: req.session.email , role: req.session.role})
   } else {
     return res.json({ valid: false })
   }
@@ -155,12 +156,12 @@ app.get('/players', (req, res) => {
   const query = "SELECT * FROM user WHERE role = 'User'";
 
   db.query(query, (err, results) => {
-      if (err) {
-          console.error("Error fetching players:", err);
-          return res.status(500).json({ message: "Error fetching players" });
-      }
-      console.log("Database results:", results);
-      return res.status(200).json(results);
+    if (err) {
+      console.error("Error fetching players:", err);
+      return res.status(500).json({ message: "Error fetching players" });
+    }
+    console.log("Database results:", results);
+    return res.status(200).json(results);
   });
 });
 
@@ -170,36 +171,36 @@ app.get('/players/:email', (req, res) => {
   const query = "SELECT * FROM user WHERE email = ?";
 
   db.query(query, [email], (err, results) => {
-      if (err) {
-          console.error("Error fetching player by email:", err);
-          return res.status(500).json({ message: "Error fetching player details" });
-      }
+    if (err) {
+      console.error("Error fetching player by email:", err);
+      return res.status(500).json({ message: "Error fetching player details" });
+    }
 
-      if (results.length === 0) {
-          return res.status(404).json({ message: "Player not found" });
-      }
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Player not found" });
+    }
 
-      return res.status(200).json(results[0]);
+    return res.status(200).json(results[0]);
   });
 });
 
 // Update Player by email
 app.put('/players/:email', (req, res) => {
   const { email } = req.params;
-  const { firstName, lastName, role, imageUrl } = req.body;
+  const { firstName, lastName, position, imageUrl } = req.body;
 
-  const query = `UPDATE user SET firstname = ?, lastname = ?, role = ?, image = ? WHERE email = ?`;
-  db.query(query, [firstName, lastName, role, imageUrl, email], (err, results) => {
-      if (err) {
-          console.error("Database error:", err);
-          return res.status(500).json({ message: "Internal server error" });
-      }
+  const query = `UPDATE user SET firstname = ?, lastname = ?, position = ?, image = ? WHERE email = ?`;
+  db.query(query, [firstName, lastName, position, imageUrl, email], (err, results) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ message: "Internal server error" });
+    }
 
-      if (results.affectedRows === 0) {
-          return res.status(404).json({ message: "Player not found" });
-      }
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ message: "Player not found" });
+    }
 
-      res.json({ message: "Player updated successfully!" });
+    res.json({ message: "Player updated successfully!" });
   });
 });
 
@@ -209,16 +210,16 @@ app.delete('/players/:email', (req, res) => {
 
   const query = `DELETE FROM user WHERE email = ?`;
   db.query(query, [email], (err, results) => {
-      if (err) {
-          console.error("Database error:", err);
-          return res.status(500).json({ message: "Internal server error" });
-      }
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ message: "Internal server error" });
+    }
 
-      if (results.affectedRows === 0) {
-          return res.status(404).json({ message: "Player not found" });
-      }
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ message: "Player not found" });
+    }
 
-      res.json({ message: "Player deleted successfully!" });
+    res.json({ message: "Player deleted successfully!" });
   });
 });
 
@@ -226,15 +227,15 @@ app.delete('/players/:email', (req, res) => {
 app.get('/comments/:playerEmail', (req, res) => {
   const { playerEmail } = req.params;
   db.query(
-      'SELECT * FROM comments WHERE player_email = ? ORDER BY created_at DESC',
-      [playerEmail],
-      (err, results) => {
-          if (err) {
-              console.error(err);
-              return res.status(500).json({ message: 'Failed to fetch comments' });
-          }
-          res.json(results);
+    'SELECT * FROM comments WHERE player_email = ? ORDER BY created_at DESC',
+    [playerEmail],
+    (err, results) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Failed to fetch comments' });
       }
+      res.json(results);
+    }
   );
 });
 
@@ -243,19 +244,19 @@ app.post('/comments', (req, res) => {
   const { email, playerEmail, comment } = req.body;
 
   if (!email || !playerEmail || !comment) {
-      return res.status(400).json({ message: 'All fields are required' });
+    return res.status(400).json({ message: 'All fields are required' });
   }
 
   db.query(
-      'INSERT INTO comments (email, player_email, comment) VALUES (?, ?, ?)',
-      [email, playerEmail, comment],
-      (err) => {
-          if (err) {
-              console.error(err);
-              return res.status(500).json({ message: 'Failed to post comment' });
-          }
-          res.status(201).json({ message: 'Comment added successfully' });
+    'INSERT INTO comments (email, player_email, comment) VALUES (?, ?, ?)',
+    [email, playerEmail, comment],
+    (err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Failed to post comment' });
       }
+      res.status(201).json({ message: 'Comment added successfully' });
+    }
   );
 });
 
@@ -266,15 +267,15 @@ app.put('/comments/:id', (req, res) => {
 
   // Logic to update comment in database
   db.query(
-      'UPDATE comments SET comment = ? WHERE id = ?',
-      [comment, id],
-      (err, results) => {
-          if (err) {
-              res.status(500).json({ error: 'Database error' });
-          } else {
-              res.json({ id, comment });
-          }
+    'UPDATE comments SET comment = ? WHERE id = ?',
+    [comment, id],
+    (err, results) => {
+      if (err) {
+        res.status(500).json({ error: 'Database error' });
+      } else {
+        res.json({ id, comment });
       }
+    }
   );
 });
 
@@ -284,11 +285,11 @@ app.delete('/comments/:id', (req, res) => {
 
   // Logic to delete the comment from the database
   db.query('DELETE FROM comments WHERE id = ?', [id], (err, results) => {
-      if (err) {
-          res.status(500).json({ error: 'Database error' });
-      } else {
-          res.json({ success: true });
-      }
+    if (err) {
+      res.status(500).json({ error: 'Database error' });
+    } else {
+      res.json({ success: true });
+    }
   });
 });
 
@@ -297,20 +298,20 @@ app.post('/offers', (req, res) => {
   const { senderEmail, receiverEmail, message } = req.body;
 
   if (!senderEmail || !receiverEmail || !message) {
-      return res.status(400).json({ error: 'Missing required fields' });
+    return res.status(400).json({ error: 'Missing required fields' });
   }
 
   // Example of inserting into a database
   db.query(
-      'INSERT INTO offers (senderEmail, receiverEmail, message) VALUES (?, ?, ?)',
-      [senderEmail, receiverEmail, message],
-      (err, result) => {
-          if (err) {
-              console.error('Database error:', err);
-              return res.status(500).json({ error: 'Failed to send offer' });
-          }
-          res.status(200).json({ success: true,});
+    'INSERT INTO offers (senderEmail, receiverEmail, message) VALUES (?, ?, ?)',
+    [senderEmail, receiverEmail, message],
+    (err, result) => {
+      if (err) {
+        console.error('Database error:', err);
+        return res.status(500).json({ error: 'Failed to send offer' });
       }
+      res.status(200).json({ success: true, });
+    }
   );
 });
 
@@ -319,15 +320,15 @@ app.get('/offers/sent/:email', (req, res) => {
   const senderEmail = req.params.email;
 
   db.query(
-      'SELECT * FROM offers WHERE senderEmail = ? ORDER BY created_at DESC',
-      [senderEmail],
-      (err, results) => {
-          if (err) {
-              console.error('Database error:', err);
-              return res.status(500).json({ error: 'Failed to fetch sent offers' });
-          }
-          res.status(200).json(results);
+    'SELECT * FROM offers WHERE senderEmail = ? ORDER BY created_at DESC',
+    [senderEmail],
+    (err, results) => {
+      if (err) {
+        console.error('Database error:', err);
+        return res.status(500).json({ error: 'Failed to fetch sent offers' });
       }
+      res.status(200).json(results);
+    }
   );
 });
 
@@ -337,16 +338,16 @@ app.put('/offers/:id', (req, res) => {
   const { message } = req.body;
 
   db.query(
-      'UPDATE offers SET message = ? WHERE id = ?',
-      [message, offerId],
-      (err, result) => {
-          if (err) {
-              console.error('Failed to update offer:', err);
-              return res.status(500).json({ error: 'Failed to update offer' });
-          }
-
-          res.status(200).json({ message: 'Offer updated successfully'});
+    'UPDATE offers SET message = ? WHERE id = ?',
+    [message, offerId],
+    (err, result) => {
+      if (err) {
+        console.error('Failed to update offer:', err);
+        return res.status(500).json({ error: 'Failed to update offer' });
       }
+
+      res.status(200).json({ message: 'Offer updated successfully' });
+    }
   );
 });
 
@@ -355,16 +356,16 @@ app.delete('/offers/:id', (req, res) => {
   const offerId = req.params.id;
 
   db.query('DELETE FROM offers WHERE id = ?', [offerId], (err, result) => {
-      if (err) {
-          console.error('Failed to delete offer:', err);
-          return res.status(500).json({ error: 'Failed to delete offer' });
-      }
+    if (err) {
+      console.error('Failed to delete offer:', err);
+      return res.status(500).json({ error: 'Failed to delete offer' });
+    }
 
-      if (result.affectedRows > 0) {
-          res.status(200).json({ message: 'Offer deleted successfully' });
-      } else {
-          res.status(404).json({ error: 'Offer not found' });
-      }
+    if (result.affectedRows > 0) {
+      res.status(200).json({ message: 'Offer deleted successfully' });
+    } else {
+      res.status(404).json({ error: 'Offer not found' });
+    }
   });
 });
 
@@ -374,26 +375,26 @@ app.get('/offers/player/:email', (req, res) => {
 
   const query = `SELECT * FROM offers WHERE receiverEmail = ?`;
   db.query(query, [playerEmail], (err, results) => {
-      if (err) {
-          console.error('Error fetching offers:', err);
-          res.status(500).json({ error: 'Failed to fetch offers' });
-          return;
-      }
-      res.json(results);
+    if (err) {
+      console.error('Error fetching offers:', err);
+      res.status(500).json({ error: 'Failed to fetch offers' });
+      return;
+    }
+    res.json(results);
   });
 });
 
 // Accept offer
 app.put('/offers/:id/accept', (req, res) => {
   const offerId = req.params.id;
-  
+
   const query = `UPDATE offers SET status = 'accepted' WHERE id = ?`;
   db.query(query, [offerId], (err, result) => {
-      if (err) {
-          console.error('Error accepting offer:', err);
-          return res.status(500).json({ error: 'Failed to accept offer' });
-      }
-      res.json({ message: 'Offer accepted successfully' });
+    if (err) {
+      console.error('Error accepting offer:', err);
+      return res.status(500).json({ error: 'Failed to accept offer' });
+    }
+    res.json({ message: 'Offer accepted successfully' });
   });
 });
 
@@ -403,11 +404,11 @@ app.put('/offers/:id/reject', (req, res) => {
 
   const query = `UPDATE offers SET status = 'rejected' WHERE id = ?`;
   db.query(query, [offerId], (err, result) => {
-      if (err) {
-          console.error('Error rejecting offer:', err);
-          return res.status(500).json({ error: 'Failed to reject offer' });
-      }
-      res.json({ message: 'Offer rejected successfully' });
+    if (err) {
+      console.error('Error rejecting offer:', err);
+      return res.status(500).json({ error: 'Failed to reject offer' });
+    }
+    res.json({ message: 'Offer rejected successfully' });
   });
 });
 
@@ -416,22 +417,25 @@ app.get('/offers/signed/:email', (req, res) => {
   const playerEmail = req.params.email;
 
   const query = `
-      SELECT * FROM offers
-      WHERE receiverEmail = ? AND status = 'accepted'
-      LIMIT 1
+     SELECT * 
+FROM offers
+WHERE receiverEmail = ? AND status = 'accepted'
+ORDER BY created_at DESC
+LIMIT 1;
+
   `;
 
   db.query(query, [playerEmail], (err, result) => {
-      if (err) {
-          console.error('Error fetching signed offer:', err);
-          return res.status(500).json({ error: 'Failed to fetch signed offer' });
-      }
+    if (err) {
+      console.error('Error fetching signed offer:', err);
+      return res.status(500).json({ error: 'Failed to fetch signed offer' });
+    }
 
-      if (result.length === 0) {
-          return res.status(404).json({ error: 'No signed offer found for this player' });
-      }
+    if (result.length === 0) {
+      return res.status(404).json({ error: 'No signed offer found for this player' });
+    }
 
-      res.json(result[0]);
+    res.json(result[0]);
   });
 });
 
@@ -447,12 +451,12 @@ app.get('/offers/latest', (req, res) => {
   `;
 
   db.query(query, (err, results) => {
-      if (err) {
-          console.error('Error fetching latest offers:', err);
-          return res.status(500).json({ error: 'Failed to fetch latest offers' });
-      }
+    if (err) {
+      console.error('Error fetching latest offers:', err);
+      return res.status(500).json({ error: 'Failed to fetch latest offers' });
+    }
 
-      res.json(results);
+    res.json(results);
   });
 });
 
@@ -462,11 +466,11 @@ app.get('/offers/:id/comments', (req, res) => {
 
   const query = `SELECT * FROM comments_transfer WHERE offer_id = ? ORDER BY created_at ASC`;
   db.query(query, [offerId], (err, results) => {
-      if (err) {
-          console.error('Error fetching comments:', err);
-          return res.status(500).json({ error: 'Failed to fetch comments' });
-      }
-      res.json(results);
+    if (err) {
+      console.error('Error fetching comments:', err);
+      return res.status(500).json({ error: 'Failed to fetch comments' });
+    }
+    res.json(results);
   });
 });
 
@@ -477,11 +481,11 @@ app.post('/offers/:id/comments', (req, res) => {
 
   const query = `INSERT INTO comments_transfer (offer_id, comment, user_email, created_at) VALUES (?, ?, ?, NOW())`;
   db.query(query, [offerId, comment, user_email], (err, result) => {
-      if (err) {
-          console.error('Error adding comment:', err);
-          return res.status(500).json({ error: 'Failed to add comment' });
-      }
-      res.json({ message: 'Comment added successfully', commentId: result.insertId });
+    if (err) {
+      console.error('Error adding comment:', err);
+      return res.status(500).json({ error: 'Failed to add comment' });
+    }
+    res.json({ message: 'Comment added successfully', commentId: result.insertId });
   });
 });
 
