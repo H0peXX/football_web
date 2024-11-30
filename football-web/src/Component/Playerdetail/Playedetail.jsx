@@ -13,9 +13,10 @@ const PlayerDetail = () => {
     const [loading, setLoading] = useState(true);
     const [comments, setComments] = useState([]);
     const [name, setName] = useState("");
-    const [userrole, setRole] = useState("");
+    const [role, setRole] = useState("");
     const [newComment, setNewComment] = useState('');
     const [editing, setEditing] = useState(false);
+    const [signedOffer, setSignedOffer] = useState(null);
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -31,10 +32,8 @@ const PlayerDetail = () => {
             .then((res) => res.json())
             .then((data) => {
                 if (data.valid) {
-                    setName(data.name); // Set user's email as name
-                    setRole(data.role); // Set user's email as name
-
-                    console.log(data)
+                    setName(data.email); // Set user's email as name
+                    setRole(data.role);
                 } else {
                     alert("Not logged in"); // Redirect if not authenticated
                 }
@@ -229,6 +228,25 @@ const PlayerDetail = () => {
         }
     };
 
+    //fetch Sign
+    useEffect(() => {
+        const fetchSignedOffer = async () => {
+            try {
+                const response = await fetch(`http://localhost:5000/offers/signed/${encodeURIComponent(email)}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setSignedOffer(data);
+                } else {
+                    setSignedOffer(null);
+                }
+            } catch (error) {
+                console.error('Error fetching signed offer:', error);
+            }
+        };
+
+        fetchSignedOffer();
+    }, [email]);
+
     const handleDelete = async () => {
         if (!window.confirm("Are you sure you want to delete this player?")) return;
 
@@ -296,16 +314,25 @@ const PlayerDetail = () => {
                     <h1>{`${player.firstname} ${player.lastname}`}</h1>
                     <p>Email: {player.email}</p>
                     <p>Role: {player.role}</p>
-                    {userrole === "Admin" && (
-                        <>
-                            <button onClick={() => setEditing(true)}>Edit</button>
-                            <button onClick={handleDelete}>Delete</button>
-                        </>
-                    )}
-
-                    {/* <button onClick={() => setEditing(true)}>Edit</button>
-                    <button onClick={handleDelete}>Delete</button> */}
+                    <div className="offer-status">
+                        {signedOffer ? (
+                            <p>
+                                <strong>Offer Signed!</strong> Signed by: {signedOffer.senderEmail}
+                                <br />
+                                Message: {signedOffer.message}
+                            </p>
+                        ) : (
+                            <p>No offer signed yet.</p>
+                        )}
+                    </div>
+                    {role === "admin" || name === email && (
+                    <>
+                    <button onClick={() => navigate(`/players/${encodeURIComponent(email)}/view-offers`)}>View Offers</button>
+                    <button onClick={() => setEditing(true)}>Edit</button>
+                    <button onClick={handleDelete}>Delete</button>
                     <button onClick={() => setShowOfferModal(true)}>Send Offer</button>
+                    </>
+                    )}
                 </>
             )}
             {/* Offer Modal */}
@@ -341,8 +368,12 @@ const PlayerDetail = () => {
                                             value={editedComment}
                                             onChange={(e) => setEditedComment(e.target.value)}
                                         />
-                                        <button onClick={() => handleSaveEditedComment(comment.id)}>Save</button>
-                                        <button onClick={() => setEditingCommentId(null)}>Cancel</button>
+                                        {role === "admin" || name === comment.email && (
+                                            <>
+                                                <button onClick={() => handleSaveEditedComment(comment.id)}>Save</button>
+                                                <button onClick={() => setEditingCommentId(null)}>Cancel</button>
+                                            </>
+                                        )}
                                     </div>
                                 ) : (
                                     <>
@@ -351,7 +382,7 @@ const PlayerDetail = () => {
                                         </p>
                                         <p>{comment.comment}</p>
                                         <small>{new Date(comment.created_at).toLocaleString()}</small>
-                                        {userrole === "Admin" && (
+                                        {role === "admin" || name === comment.email && (
                                             <>
                                                 <button onClick={() => handleEditComment(comment.id, comment.comment)}>Edit</button>
                                                 <button onClick={() => handleDeleteComment(comment.id)}>Delete</button>
