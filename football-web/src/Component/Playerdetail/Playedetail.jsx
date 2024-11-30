@@ -325,6 +325,7 @@ const PlayerDetail = () => {
                             <p>No offer signed yet.</p>
                         )}
                     </div>
+
                     {role === "admin" || name === email && (
                         <>
                             <button onClick={() => navigate(`/players/${encodeURIComponent(email)}/view-offers`)}>View Offers</button>
@@ -337,6 +338,7 @@ const PlayerDetail = () => {
                             <button onClick={() => setShowOfferModal(true)}>Send Offer</button>
                         </>
                     )}
+
 
                 </>
             )}

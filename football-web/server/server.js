@@ -320,7 +320,7 @@ app.post('/offers', (req, res) => {
   );
 });
 
-//view offer
+//view sent offer
 app.get('/offers/sent/:email', (req, res) => {
   const senderEmail = req.params.email;
 
@@ -335,6 +335,199 @@ app.get('/offers/sent/:email', (req, res) => {
           res.status(200).json(results);
       }
   );
+});
+
+//edit sent offer
+app.put('/offers/:id', (req, res) => {
+  const offerId = req.params.id;
+  const { message } = req.body;
+
+  db.query(
+      'UPDATE offers SET message = ? WHERE id = ?',
+      [message, offerId],
+      (err, result) => {
+          if (err) {
+              console.error('Failed to update offer:', err);
+              return res.status(500).json({ error: 'Failed to update offer' });
+          }
+
+          res.status(200).json({ message: 'Offer updated successfully'});
+      }
+  );
+});
+
+//delete sent offer
+app.delete('/offers/:id', (req, res) => {
+  const offerId = req.params.id;
+
+  db.query('DELETE FROM offers WHERE id = ?', [offerId], (err, result) => {
+      if (err) {
+          console.error('Failed to delete offer:', err);
+          return res.status(500).json({ error: 'Failed to delete offer' });
+      }
+
+      if (result.affectedRows > 0) {
+          res.status(200).json({ message: 'Offer deleted successfully' });
+      } else {
+          res.status(404).json({ error: 'Offer not found' });
+      }
+  });
+});
+
+//view retrieve offer
+app.get('/offers/player/:email', (req, res) => {
+  const playerEmail = decodeURIComponent(req.params.email);
+
+  const query = `SELECT * FROM offers WHERE receiverEmail = ?`;
+  db.query(query, [playerEmail], (err, results) => {
+      if (err) {
+          console.error('Error fetching offers:', err);
+          res.status(500).json({ error: 'Failed to fetch offers' });
+          return;
+      }
+      res.json(results);
+  });
+});
+
+// Accept offer
+app.put('/offers/:id/accept', (req, res) => {
+  const offerId = req.params.id;
+  
+  const query = `UPDATE offers SET status = 'accepted' WHERE id = ?`;
+  db.query(query, [offerId], (err, result) => {
+      if (err) {
+          console.error('Error accepting offer:', err);
+          return res.status(500).json({ error: 'Failed to accept offer' });
+      }
+      res.json({ message: 'Offer accepted successfully' });
+  });
+});
+
+//Reject offer
+app.put('/offers/:id/reject', (req, res) => {
+  const offerId = req.params.id;
+
+  const query = `UPDATE offers SET status = 'rejected' WHERE id = ?`;
+  db.query(query, [offerId], (err, result) => {
+      if (err) {
+          console.error('Error rejecting offer:', err);
+          return res.status(500).json({ error: 'Failed to reject offer' });
+      }
+      res.json({ message: 'Offer rejected successfully' });
+  });
+});
+
+//fetch sign
+app.get('/offers/signed/:email', (req, res) => {
+  const playerEmail = req.params.email;
+
+  const query = `
+      SELECT * FROM offers
+      WHERE receiverEmail = ? AND status = 'accepted'
+      LIMIT 1
+  `;
+
+  db.query(query, [playerEmail], (err, result) => {
+      if (err) {
+          console.error('Error fetching signed offer:', err);
+          return res.status(500).json({ error: 'Failed to fetch signed offer' });
+      }
+
+      if (result.length === 0) {
+          return res.status(404).json({ error: 'No signed offer found for this player' });
+      }
+
+      res.json(result[0]);
+  });
+});
+
+//fetch news
+app.get('/offers/latest', (req, res) => {
+  const query = `
+      SELECT o.id, o.senderEmail, o.receiverEmail, o.message, o.status, o.created_at, u.firstname, u.lastname
+      FROM offers o
+      JOIN user u ON o.receiverEmail = u.email
+      WHERE o.status = 'accepted'
+      ORDER BY o.created_at DESC
+      LIMIT 5
+  `;
+
+  db.query(query, (err, results) => {
+      if (err) {
+          console.error('Error fetching latest offers:', err);
+          return res.status(500).json({ error: 'Failed to fetch latest offers' });
+      }
+
+      res.json(results);
+  });
+});
+
+//get transfer comment
+app.get('/offers/:id/comments', (req, res) => {
+  const offerId = req.params.id;
+
+  const query = `SELECT * FROM comments_transfer WHERE offer_id = ? ORDER BY created_at ASC`;
+  db.query(query, [offerId], (err, results) => {
+      if (err) {
+          console.error('Error fetching comments:', err);
+          return res.status(500).json({ error: 'Failed to fetch comments' });
+      }
+      res.json(results);
+  });
+});
+
+//add transfer comment
+app.post('/offers/:id/comments', (req, res) => {
+  const offerId = req.params.id;
+  const { comment, user_email } = req.body;
+
+  const query = `INSERT INTO comments_transfer (offer_id, comment, user_email, created_at) VALUES (?, ?, ?, NOW())`;
+  db.query(query, [offerId, comment, user_email], (err, result) => {
+      if (err) {
+          console.error('Error adding comment:', err);
+          return res.status(500).json({ error: 'Failed to add comment' });
+      }
+      res.json({ message: 'Comment added successfully', commentId: result.insertId });
+  });
+});
+
+//update transfer comment
+app.put('/offers/:offerId/comments/:commentId', (req, res) => {
+  const { offerId, commentId } = req.params;
+  const { comment } = req.body;
+
+  const query = 'UPDATE comments_transfer SET comment = ? WHERE id = ? AND offer_id = ?';
+  db.query(query, [comment, commentId, offerId], (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Error updating comment');
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).send('Comment not found');
+    }
+
+    res.send('Comment updated successfully');
+  });
+});
+
+//delete trasfer comment
+app.delete('/offers/:offerId/comments/:commentId', (req, res) => {
+  const { offerId, commentId } = req.params;
+
+  const query = 'DELETE FROM comments_transfer WHERE id = ? AND offer_id = ?';
+  db.query(query, [commentId, offerId], (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Error deleting comment');
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).send('Comment not found');
+    }
+
+    res.send('Comment deleted successfully');
+  });
 });
 
 // Start the server
