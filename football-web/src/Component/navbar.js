@@ -76,8 +76,22 @@ function NavBar() {
             Home
           </NavLink>
         </li>
-
-        {/* Conditionally render Login/Signup or Logout based on login status */}
+        <li>
+          <NavLink
+            to="/players"
+            className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+          >
+            Playerlisting
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to="/offers/sent"
+            className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+          >
+            Sentoffer
+          </NavLink>
+        </li>
         {!isLoggedIn ? (
           <>
             <li>

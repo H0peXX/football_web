@@ -33,7 +33,7 @@ const PlayerDetail = () => {
             .then((data) => {
                 if (data.valid) {
                     setName(data.email); // Set user's email as name
-                    setRole(data.role); // Set user's role as role
+                    setRole(data.role);
                 } else {
                     alert("Not logged in"); // Redirect if not authenticated
                 }
@@ -370,8 +370,12 @@ const PlayerDetail = () => {
                                             value={editedComment}
                                             onChange={(e) => setEditedComment(e.target.value)}
                                         />
-                                        <button onClick={() => handleSaveEditedComment(comment.id)}>Save</button>
-                                        <button onClick={() => setEditingCommentId(null)}>Cancel</button>
+                                        {role === "admin" || name === comment.email && (
+                                            <>
+                                                <button onClick={() => handleSaveEditedComment(comment.id)}>Save</button>
+                                                <button onClick={() => setEditingCommentId(null)}>Cancel</button>
+                                            </>
+                                        )}
                                     </div>
                                 ) : (
                                     <>
