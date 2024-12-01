@@ -200,7 +200,7 @@ const LinkedInHomePage = () => {
                             <p style={{ fontSize: "12px", color: "#aaa" }}>
                               {new Date(comment.created_at).toLocaleString()}
                             </p>
-                            {role === "admin"  || name === comment.user_email && (
+                            {(role === "Admin"  || name === comment.user_email) && (
                               <>
                                 <button
                                   onClick={() => editComment(comment)}
@@ -216,7 +216,6 @@ const LinkedInHomePage = () => {
                                 </button>
                               </>
                             )}
-
                           </div>
                         )}
                       </div>
