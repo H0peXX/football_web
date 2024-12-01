@@ -146,6 +146,7 @@ const LoginSignup = ({ action }) => {
                                     accept="image/*" 
                                     onChange={handleImageChange} 
                                 />
+                                : less than 50kb
                             </div>
                         </>
                     )}
