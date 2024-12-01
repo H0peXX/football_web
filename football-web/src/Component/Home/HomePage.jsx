@@ -50,6 +50,10 @@ const LinkedInHomePage = () => {
     fetchLatestTransfers();
   }, []);
 
+  const handleProfileNavigation = () => {
+    navigate(`/players/${encodeURIComponent(name)}`); // Assuming profile route is based on name or user ID
+};
+
   // Fetch comments for a specific transfer
   const fetchComments = async (offerId) => {
     try {
@@ -135,6 +139,20 @@ const LinkedInHomePage = () => {
           <div style={{ marginBottom: "20px" }}>
             <h3 style={{ fontSize: "18px", margin: "0 0 10px" }}>{name || "Your Name"}</h3>
             <p style={{ fontSize: "14px", color: "#555" }}>user info : {role} </p>
+            <button 
+                style={{
+                    padding: "8px 12px",
+                    fontSize: "14px",
+                    color: "#fff",
+                    backgroundColor: "#007bff",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer"
+                }} 
+                onClick={handleProfileNavigation}
+            >
+                View Profile
+            </button>
           </div>
         </aside>
 

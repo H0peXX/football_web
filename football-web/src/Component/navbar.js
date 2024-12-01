@@ -113,14 +113,6 @@ function NavBar() {
           </>
         ) : (
           <>
-            <li>
-              <NavLink
-                to="/players"
-                className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
-              >
-                Playerlisting
-              </NavLink>
-            </li>
             {role === "coach" && (
               <li>
                 <NavLink
