@@ -7,23 +7,52 @@ const ViewOffers = () => {
     const navigate = useNavigate();
     const [offers, setOffers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [userEmail, setUserEmail] = useState("");
 
-    // Fetch offers from the backend
+    // Fetch current user info
     useEffect(() => {
-        const fetchOffers = async () => {
+        const fetchUserData = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/offers/player/${encodeURIComponent(email)}`);
+                const response = await fetch("http://localhost:5000", {
+                    method: "GET",
+                    credentials: "include",
+                });
                 const data = await response.json();
-                setOffers(data);
+                if (data.valid) {
+                    setUserEmail(data.email);
+                } else {
+                    navigate("/login");
+                }
             } catch (error) {
-                console.error('Failed to fetch offers:', error);
-            } finally {
-                setLoading(false);
+                console.error("Failed to fetch user data:", error);
+                navigate("/login");
             }
         };
 
-        fetchOffers();
-    }, [email]);
+        fetchUserData();
+    }, [navigate]);
+
+    // Fetch offers if the user is authorized
+    useEffect(() => {
+        if (userEmail && userEmail === email) {
+            const fetchOffers = async () => {
+                try {
+                    const response = await fetch(`http://localhost:5000/offers/player/${encodeURIComponent(email)}`);
+                    const data = await response.json();
+                    setOffers(data);
+                } catch (error) {
+                    console.error('Failed to fetch offers:', error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            fetchOffers();
+        } else if (userEmail) {
+            alert("You are not authorized to view this page.");
+            navigate("/home");
+        }
+    }, [email, userEmail, navigate]);
 
     // Handle accepting or rejecting an offer
     const handleOfferAction = async (offerId, action) => {

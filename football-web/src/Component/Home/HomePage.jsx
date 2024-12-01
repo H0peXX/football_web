@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 const LinkedInHomePage = () => {
   const [name, setName] = useState("");
+  const [role, setRole] = useState("")
   const [latestTransfers, setLatestTransfers] = useState([]);
   const [comments, setComments] = useState({});
   const [newComment, setNewComment] = useState({});
@@ -25,6 +26,7 @@ const LinkedInHomePage = () => {
       .then((data) => {
         if (data.valid) {
           setName(data.email);
+          setRole(data.role);
         } else {
           navigate("/login");
         }
@@ -132,7 +134,7 @@ const LinkedInHomePage = () => {
         >
           <div style={{ marginBottom: "20px" }}>
             <h3 style={{ fontSize: "18px", margin: "0 0 10px" }}>{name || "Your Name"}</h3>
-            <p style={{ fontSize: "14px", color: "#555" }}>user info</p>
+            <p style={{ fontSize: "14px", color: "#555" }}>user info : {role} </p>
           </div>
         </aside>
 
@@ -180,18 +182,23 @@ const LinkedInHomePage = () => {
                             <p style={{ fontSize: "12px", color: "#aaa" }}>
                               {new Date(comment.created_at).toLocaleString()}
                             </p>
-                            <button
-                              onClick={() => editComment(comment)}
-                              style={{ padding: "5px 10px", backgroundColor: "#ffa500", color: "#fff", border: "none", borderRadius: "3px" }}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => deleteComment(transfer.id, comment.id)}
-                              style={{ padding: "5px 10px", backgroundColor: "#dc3545", color: "#fff", border: "none", borderRadius: "3px", marginLeft: "5px" }}
-                            >
-                              Delete
-                            </button>
+                            {role === "admin"  || name === comment.user_email && (
+                              <>
+                                <button
+                                  onClick={() => editComment(comment)}
+                                  style={{ padding: "5px 10px", backgroundColor: "#ffa500", color: "#fff", border: "none", borderRadius: "3px" }}
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => deleteComment(transfer.id, comment.id)}
+                                  style={{ padding: "5px 10px", backgroundColor: "#dc3545", color: "#fff", border: "none", borderRadius: "3px", marginLeft: "5px" }}
+                                >
+                                  Delete
+                                </button>
+                              </>
+                            )}
+
                           </div>
                         )}
                       </div>

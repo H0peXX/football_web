@@ -20,7 +20,7 @@ const PlayerDetail = () => {
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
-        role: "",
+        position: "",
         imageUrl: "",
     });
 
@@ -294,10 +294,10 @@ const PlayerDetail = () => {
                     />
                     <input
                         type="text"
-                        name="role"
-                        value={formData.role}
+                        name="position"
+                        value={formData.position}
                         onChange={handleInputChange}
-                        placeholder="Role"
+                        placeholder="Position"
                     />
                     <input
                         type="text"
@@ -314,6 +314,7 @@ const PlayerDetail = () => {
                     <h1>{`${player.firstname} ${player.lastname}`}</h1>
                     <p>Email: {player.email}</p>
                     <p>Role: {player.role}</p>
+                    <p>Position: {player.position}</p>
                     <div className="offer-status">
                         {signedOffer ? (
                             <p>
@@ -325,21 +326,15 @@ const PlayerDetail = () => {
                             <p>No offer signed yet.</p>
                         )}
                     </div>
-
-                    {role === "admin" || name === email && (
+                    {(name === player.email || role === "Admin") && (
                         <>
                             <button onClick={() => navigate(`/players/${encodeURIComponent(email)}/view-offers`)}>View Offers</button>
                             <button onClick={() => setEditing(true)}>Edit</button>
                             <button onClick={handleDelete}>Delete</button>
-                        </>
-                    )}
+                        </>)}
                     {role === "coach" && (
-                        <>
-                            <button onClick={() => setShowOfferModal(true)}>Send Offer</button>
-                        </>
+                        <button onClick={() => setShowOfferModal(true)}>Send Offer</button>
                     )}
-
-
                 </>
             )}
             {/* Offer Modal */}

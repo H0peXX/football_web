@@ -5,7 +5,24 @@ import "./navbar.css";
 function NavBar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
-
+  const [name, setName] = useState("");
+  const [role, setRole] = useState("")
+  useEffect(() => {
+    fetch("http://localhost:5000", {
+      method: "GET",
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.valid) {
+          setName(data.email);
+          setRole(data.role);
+        } else {
+          navigate("/login");
+        }
+      })
+      .catch((err) => console.error("Error fetching user data:", err));
+  }, [navigate]);
   // Check if the user is logged in
   useEffect(() => {
     const checkLoginStatus = async () => {
@@ -95,16 +112,37 @@ function NavBar() {
             </li>
           </>
         ) : (
-          <li>
-            <span
-              onClick={handleLogout}
-              className="nav-link logout-link"
-              role="button"
-              tabIndex="0"
-            >
-              Logout
-            </span>
-          </li>
+          <>
+            <li>
+              <NavLink
+                to="/players"
+                className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+              >
+                Playerlisting
+              </NavLink>
+            </li>
+            {role === "coach" && (
+              <li>
+                <NavLink
+                  to="/offers/sent"
+                  className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+                >
+                  Sentoffer
+                </NavLink>
+              </li>
+            )}
+
+            <li>
+              <span
+                onClick={handleLogout}
+                className="nav-link logout-link"
+                role="button"
+                tabIndex="0"
+              >
+                Logout
+              </span>
+            </li>
+          </>
         )}
       </ul>
     </nav>
