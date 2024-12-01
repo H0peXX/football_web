@@ -163,7 +163,6 @@ app.get('/players', (req, res) => {
       console.error("Error fetching players:", err);
       return res.status(500).json({ message: "Error fetching players" });
     }
-    console.log("Database results:", results);
     return res.status(200).json(results);
   });
 });
