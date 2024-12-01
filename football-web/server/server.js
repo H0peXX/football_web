@@ -95,14 +95,13 @@ app.post("/login", async (req, res) => {
 
 // Signup Route
 app.post("/signup", async (req, res) => {
-  const { email, password, firstName, lastName , position } = req.body;
+  const { email, password, firstName, lastName , position , profilePicture } = req.body;
 
   // Validate input fields
   if (!email || !password || !firstName || !lastName) {
     return res.status(400).json({ message: "All fields are required!" });
   }
 
-  // Check if the user already exists
   // Check if the user already exists
 db.query("SELECT * FROM user WHERE email = ?", [email], async (err, results) => {
   if (err) {
@@ -121,8 +120,8 @@ db.query("SELECT * FROM user WHERE email = ?", [email], async (err, results) => 
   const defaultRole = 'user'; // Adjust this as needed
 
   // Insert the new user into the database
-  const query = "INSERT INTO user (firstname, lastname, email, password, position, role) VALUES (?, ?, ?, ?, ?, ?)";
-  db.query(query, [firstName, lastName, email, hashedPassword, position, defaultRole], (err) => {
+  const query = "INSERT INTO user (firstname, lastname, email, password, position, role, image) VALUES (?, ?, ?, ?, ?, ?, ?)";
+  db.query(query, [firstName, lastName, email, hashedPassword, position, defaultRole, profilePicture], (err) => {
     if (err) {
       console.error("Database error:", err);
       return res.status(500).json({ message: "Internal server error" });
@@ -377,7 +376,7 @@ app.delete('/offers/:id', (req, res) => {
 app.get('/offers/player/:email', (req, res) => {
   const playerEmail = decodeURIComponent(req.params.email);
 
-  const query = `SELECT * FROM offers WHERE receiverEmail = ?`;
+  const query = `SELECT * FROM offers WHERE receiverEmail = ? AND status = 'pending'`;
   db.query(query, [playerEmail], (err, results) => {
     if (err) {
       console.error('Error fetching offers:', err);

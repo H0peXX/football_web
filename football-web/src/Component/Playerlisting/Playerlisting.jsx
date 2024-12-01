@@ -29,7 +29,7 @@ const PlayerListing = () => {
                     <div className="player-card">
                         <img
                             className="player-avatar"
-                            src={player.image || "https://via.placeholder.com/150"}
+                            src={`data:image/jpeg;base64,${player.image}` || "https://via.placeholder.com/150"}
                             alt={`${player.firstname} ${player.lastname}`}
                         />
                         <div className="player-info">

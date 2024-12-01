@@ -272,7 +272,7 @@ const PlayerDetail = () => {
     return (
         <div className="player-detail">
             <img
-                src={player.image || 'https://via.placeholder.com/150'}
+                src={`data:image/jpeg;base64,${player.image}`|| 'https://via.placeholder.com/150'}
                 alt={`${player.firstname} ${player.lastname}`}
                 className="player-avatar"
             />

@@ -5,24 +5,24 @@ import password_icon from './Asset/password.png';
 import './LoginSignup.css';
 import { useNavigate } from "react-router-dom";
 
-
-
 const LoginSignup = ({ action }) => {
     const [currentAction, setCurrentAction] = useState(action || "Login");
     const [animationClass, setAnimationClass] = useState("fade-in");
     const navigate = useNavigate();
 
-    // Define formData state
+    // Define formData state, including the image field
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
         email: "",
         password: "",
+        position: "",
+        profilePicture: "" // Store Base64 image here
     });
 
     // Update the state if the action prop changes
     useEffect(() => {
-        setCurrentAction(action); 
+        setCurrentAction(action);
     }, [action]);
 
     // Handle form input changes
@@ -33,6 +33,23 @@ const LoginSignup = ({ action }) => {
             [name]: value,
         }));
     };
+
+    // Handle the image input change and convert to Base64
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64Image = reader.result.split(',')[1]; // Strip out the data URL prefix
+                setFormData((prevState) => ({
+                    ...prevState,
+                    profilePicture: base64Image
+                }));
+            };
+            reader.readAsDataURL(file); // Convert image to Base64
+        }
+    };
+
     // Handle form submission (Login or Signup)
     const handleSubmit = async (e) => {
         e.preventDefault(); // Prevent default form submission
@@ -59,7 +76,8 @@ const LoginSignup = ({ action }) => {
                     lastName: "",
                     email: "",
                     password: "",
-                    position: ""
+                    position: "",
+                    profilePicture: "" // Reset profile picture
                 });
                 navigate("/home");
             } else {
@@ -120,7 +138,15 @@ const LoginSignup = ({ action }) => {
                                     onChange={handleInputChange} 
                                 />
                             </div>
-                            
+
+                            {/* New Image Upload Field */}
+                            <div className="input">
+                                <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    onChange={handleImageChange} 
+                                />
+                            </div>
                         </>
                     )}
                     <div className="input">
