@@ -41,7 +41,7 @@ const PlayerDetail = () => {
             .catch((err) => console.error("Error fetching user data:", err));
     }, [navigate]);
 
-    useEffect(() => {
+    {useEffect(() => {
         fetch(`http://localhost:5000/players/${encodeURIComponent(email)}`)
             .then((response) => response.json())
             .then((data) => {
@@ -58,7 +58,7 @@ const PlayerDetail = () => {
                 console.error("Error fetching player details:", error);
                 setLoading(false);
             });
-    }, [email]);
+    }, [email]);}
 
     useEffect(() => {
         const fetchComments = async () => {
@@ -266,6 +266,22 @@ const PlayerDetail = () => {
         }
     };
 
+        // Handle the image input change and convert to Base64
+        const handleImageChange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const base64Image = reader.result.split(',')[1]; // Strip out the data URL prefix
+                    setFormData((prevState) => ({
+                        ...prevState,
+                        imageUrl: base64Image
+                    }));
+                };
+                reader.readAsDataURL(file); // Convert image to Base64
+            }
+        };
+
     if (loading) return <p>Loading...</p>;
     if (!player) return <p>Player not found!</p>;
 
@@ -277,39 +293,49 @@ const PlayerDetail = () => {
                 className="player-avatar"
             />
             {editing ? (
-                <div className="player-edit-form">
-                    <input
-                        type="text"
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleInputChange}
-                        placeholder="First Name"
-                    />
-                    <input
-                        type="text"
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleInputChange}
-                        placeholder="Last Name"
-                    />
-                    <input
-                        type="text"
-                        name="position"
-                        value={formData.position}
-                        onChange={handleInputChange}
-                        placeholder="Position"
-                    />
-                    <input
-                        type="text"
-                        name="imageUrl"
-                        value={formData.imageUrl}
-                        onChange={handleInputChange}
-                        placeholder="Image URL"
-                    />
-                    <button onClick={handleUpdate}>Save Changes</button>
-                    <button onClick={() => setEditing(false)}>Cancel</button>
-                </div>
-            ) : (
+    <div className="player-edit-form">
+        <input
+            type="text"
+            name="firstName"
+            value={formData.firstName}  // Use formData here
+            onChange={handleInputChange}
+            placeholder="First Name"
+        />
+        <input
+            type="text"
+            name="lastName"
+            value={formData.lastName}  // Use formData here
+            onChange={handleInputChange}
+            placeholder="Last Name"
+        />
+        <input
+            type="text"
+            name="position"
+            value={formData.position}  // Use formData here
+            onChange={handleInputChange}
+            placeholder="Position"
+        />
+        <input
+            type="file"
+            name="image"
+            accept="image/*"
+            onChange={handleImageChange}
+        />
+
+        {formData.imageUrl && (  // Ensure to use formData for the image preview
+            <div>
+                <img
+                    src={`data:image/jpeg;base64,${formData.imageUrl}`}
+                    alt="Image preview"
+                    style={{ width: '150px', height: 'auto', marginTop: '10px' }}
+                />
+            </div>
+        )}
+
+        <button onClick={handleUpdate}>Save Changes</button>
+        <button onClick={() => setEditing(false)}>Cancel</button>
+    </div>
+) : (
                 <>
                     <h1>{`${player.firstname} ${player.lastname}`}</h1>
                     <p>Email: {player.email}</p>
