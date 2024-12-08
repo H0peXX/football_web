@@ -13,7 +13,7 @@ const ViewOffers = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await fetch("http://localhost:5000", {
+                const response = await fetch("http://52.5.57.32:5000", {
                     method: "GET",
                     credentials: "include",
                 });
@@ -37,7 +37,7 @@ const ViewOffers = () => {
         if (userEmail && userEmail === email) {
             const fetchOffers = async () => {
                 try {
-                    const response = await fetch(`http://localhost:5000/offers/player/${encodeURIComponent(email)}`);
+                    const response = await fetch(`http://52.5.57.32:5000/offers/player/${encodeURIComponent(email)}`);
                     const data = await response.json();
                     setOffers(data);
                 } catch (error) {
@@ -57,7 +57,7 @@ const ViewOffers = () => {
     // Handle accepting or rejecting an offer
     const handleOfferAction = async (offerId, action) => {
         try {
-            const response = await fetch(`http://localhost:5000/offers/${offerId}/${action}`, {
+            const response = await fetch(`http://52.5.57.32:5000/offers/${offerId}/${action}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
             });

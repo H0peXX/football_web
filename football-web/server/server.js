@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const mysql = require("mysql2"); // MySQL package
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
