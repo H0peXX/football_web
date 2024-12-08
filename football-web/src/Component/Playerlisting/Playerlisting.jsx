@@ -7,7 +7,7 @@ const PlayerListing = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch("http://localhost:5000/players")
+        fetch("http://52.5.57.32:5000/players")
             .then((response) => response.json())
             .then((data) => {
                 setPlayers(data);

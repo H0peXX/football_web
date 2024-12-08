@@ -18,7 +18,7 @@ const LinkedInHomePage = () => {
 
   // Fetch user data
   useEffect(() => {
-    fetch("http://localhost:5000", {
+    fetch("http://52.5.57.32:5000", {
       method: "GET",
       credentials: "include",
     })
@@ -38,7 +38,7 @@ const LinkedInHomePage = () => {
   useEffect(() => {
     const fetchLatestTransfers = async () => {
       try {
-        const response = await fetch("http://localhost:5000/offers/latest");
+        const response = await fetch("http://52.5.57.32:5000/offers/latest");
         if (response.ok) {
           const data = await response.json();
           setLatestTransfers(data);
@@ -57,7 +57,7 @@ const LinkedInHomePage = () => {
   // Fetch comments for a specific transfer
   const fetchComments = async (offerId) => {
     try {
-      const response = await fetch(`http://localhost:5000/offers/${offerId}/comments`);
+      const response = await fetch(`http://52.5.57.32:5000/offers/${offerId}/comments`);
       if (response.ok) {
         const data = await response.json();
         setComments((prev) => ({ ...prev, [offerId]: data }));
@@ -70,7 +70,7 @@ const LinkedInHomePage = () => {
   // Post a new comment
   const postComment = async (offerId) => {
     try {
-      const response = await fetch(`http://localhost:5000/offers/${offerId}/comments`, {
+      const response = await fetch(`http://52.5.57.32:5000/offers/${offerId}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ comment: newComment[offerId], user_email: name }),
@@ -92,7 +92,7 @@ const LinkedInHomePage = () => {
   // Save the edited comment
   const saveEditedComment = async (offerId, commentId) => {
     try {
-      const response = await fetch(`http://localhost:5000/offers/${offerId}/comments/${commentId}`, {
+      const response = await fetch(`http://52.5.57.32:5000/offers/${offerId}/comments/${commentId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ comment: editingComment.comment }),
@@ -109,7 +109,7 @@ const LinkedInHomePage = () => {
   // Delete a comment
   const deleteComment = async (offerId, commentId) => {
     try {
-      const response = await fetch(`http://localhost:5000/offers/${offerId}/comments/${commentId}`, {
+      const response = await fetch(`http://52.5.57.32:5000/offers/${offerId}/comments/${commentId}`, {
         method: "DELETE",
       });
       if (response.ok) {

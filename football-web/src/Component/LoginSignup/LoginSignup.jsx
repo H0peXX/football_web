@@ -54,7 +54,7 @@ const LoginSignup = ({ action }) => {
     const handleSubmit = async (e) => {
         e.preventDefault(); // Prevent default form submission
         const endpoint = currentAction === "Login" ? "/login" : "/signup";
-        const url = `http://localhost:5000${endpoint}`;
+        const url = `http://52.5.57.32:5000${endpoint}`;
 
         try {
             const response = await fetch(url, {

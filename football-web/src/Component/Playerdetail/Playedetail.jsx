@@ -25,7 +25,7 @@ const PlayerDetail = () => {
     });
 
     useEffect(() => {
-        fetch("http://localhost:5000", {
+        fetch("http://52.5.57.32:5000", {
             method: "GET",
             credentials: "include", // Send cookies with request
         })
@@ -42,7 +42,7 @@ const PlayerDetail = () => {
     }, [navigate]);
 
     {useEffect(() => {
-        fetch(`http://localhost:5000/players/${encodeURIComponent(email)}`)
+        fetch(`http://52.5.57.32:5000/players/${encodeURIComponent(email)}`)
             .then((response) => response.json())
             .then((data) => {
                 setPlayer(data);
@@ -63,7 +63,7 @@ const PlayerDetail = () => {
     useEffect(() => {
         const fetchComments = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/comments/${encodeURIComponent(email)}`);
+                const response = await fetch(`http://52.5.57.32:5000/comments/${encodeURIComponent(email)}`);
                 const data = await response.json();
                 setComments(data);
             } catch (error) {
@@ -84,7 +84,7 @@ const PlayerDetail = () => {
 
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:5000/comments', {
+            const response = await fetch('http://52.5.57.32:5000/comments', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -121,7 +121,7 @@ const PlayerDetail = () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:5000/comments/${commentId}`, {
+            const response = await fetch(`http://52.5.57.32:5000/comments/${commentId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ comment: editedComment }),
@@ -149,7 +149,7 @@ const PlayerDetail = () => {
         if (!window.confirm("Are you sure you want to delete this comment?")) return;
 
         try {
-            const response = await fetch(`http://localhost:5000/comments/${commentId}`, {
+            const response = await fetch(`http://52.5.57.32:5000/comments/${commentId}`, {
                 method: 'DELETE',
             });
 
@@ -177,7 +177,7 @@ const PlayerDetail = () => {
                 message: offerMessage,
             });
 
-            const response = await fetch('http://localhost:5000/offers', {
+            const response = await fetch('http://52.5.57.32:5000/offers', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -209,7 +209,7 @@ const PlayerDetail = () => {
 
     const handleUpdate = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/players/${encodeURIComponent(email)}`, {
+            const response = await fetch(`http://52.5.57.32:5000/players/${encodeURIComponent(email)}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),
@@ -232,7 +232,7 @@ const PlayerDetail = () => {
     useEffect(() => {
         const fetchSignedOffer = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/offers/signed/${encodeURIComponent(email)}`);
+                const response = await fetch(`http://52.5.57.32:5000/offers/signed/${encodeURIComponent(email)}`);
                 if (response.ok) {
                     const data = await response.json();
                     setSignedOffer(data);
@@ -251,7 +251,7 @@ const PlayerDetail = () => {
         if (!window.confirm("Are you sure you want to delete this player?")) return;
 
         try {
-            const response = await fetch(`http://localhost:5000/players/${encodeURIComponent(email)}`, {
+            const response = await fetch(`http://52.5.57.32:5000/players/${encodeURIComponent(email)}`, {
                 method: "DELETE",
             });
 

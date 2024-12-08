@@ -8,7 +8,7 @@ function NavBar() {
   const [name, setName] = useState("");
   const [role, setRole] = useState("")
   useEffect(() => {
-    fetch("http://localhost:5000", {
+    fetch("http://52.5.57.32:5000", {
       method: "GET",
       credentials: "include",
     })
@@ -27,7 +27,7 @@ function NavBar() {
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
-        const response = await fetch("http://localhost:5000/", {
+        const response = await fetch("http://52.5.57.32:5000/", {
           method: "GET",
           credentials: "include", // Include session cookies
         });

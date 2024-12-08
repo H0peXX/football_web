@@ -48,7 +48,7 @@ db.connect((err) => {
 
 // Enable CORS
 app.use(cors({
-  origin: ["http://localhost:3000"], // React frontend URL
+  origin: ['*'], // React frontend URL
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
 }));
@@ -163,7 +163,6 @@ app.get('/players', (req, res) => {
       console.error("Error fetching players:", err);
       return res.status(500).json({ message: "Error fetching players" });
     }
-    console.log("Database results:", results);
     return res.status(200).json(results);
   });
 });

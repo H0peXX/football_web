@@ -14,7 +14,7 @@ const SentOffers = () => {
     useEffect(() => {
         const fetchUserDetails = async () => {
             try {
-                const response = await fetch("http://localhost:5000", {
+                const response = await fetch("http://52.5.57.32:5000", {
                     method: "GET",
                     credentials: "include",
                 });
@@ -46,7 +46,7 @@ const SentOffers = () => {
 
     const fetchSentOffers = async (email) => {
         try {
-            const response = await fetch(`http://localhost:5000/offers/sent/${encodeURIComponent(email)}`);
+            const response = await fetch(`http://52.5.57.32:5000/offers/sent/${encodeURIComponent(email)}`);
             const data = await response.json();
             setOffers(data);
         } catch (error) {
@@ -60,7 +60,7 @@ const SentOffers = () => {
         if (!window.confirm("Are you sure you want to delete this offer?")) return;
 
         try {
-            const response = await fetch(`http://localhost:5000/offers/${offerId}`, {
+            const response = await fetch(`http://52.5.57.32:5000/offers/${offerId}`, {
                 method: "DELETE",
             });
 
@@ -87,7 +87,7 @@ const SentOffers = () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:5000/offers/${offerId}`, {
+            const response = await fetch(`http://52.5.57.32:5000/offers/${offerId}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message: editedMessage }),
